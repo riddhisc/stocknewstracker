@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Stock News Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --primary-light: #3b82f6;
+            --text-dark: #1e293b;
+            --text-light: #6b7280;
+            --bg-light: #f3f4f6;
+        }
+        
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            padding-bottom: 2rem;
+        }
+        .search-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            margin: 2rem auto;
+            max-width: 900px;
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .news-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .news-card:nth-child(2n) {
+            animation-delay: 0.1s;
+        }
+        .news-card:nth-child(3n) {
+            animation-delay: 0.2s;
+        }
+        .news-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .news-card:hover::after {
+            transform: translateX(100%);
+        }
+        .news-card h5 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+        .news-card .card-text {
+            color: #4b5563;
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+        }
+        .news-source {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .news-date {
+            color: #9ca3af;
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+        .error-message {
+            color: #ef4444;
+            display: none;
+            margin-top: 1rem;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            background: rgba(254, 226, 226, 0.9);
+            border-left: 4px solid #ef4444;
+        }
+        .stock-chip {
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            font-size: 0.9rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            font-weight: 500;
+            padding: 0.6rem 1.2rem !important;
+            color: var(--primary-color) !important;
+            backdrop-filter: blur(4px);
+        }
+        .stock-chip:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        .btn-light {
+            background-color: white;
+            border-color: #e5e7eb;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .btn-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .btn-outline-light {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        input.form-control {
+            font-family: 'Poppins', sans-serif;
+            padding: 0.8rem 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        input.form-control:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+            background: white;
+            transform: translateY(-1px);
+        }
+        .read-more-link {
+            color: var(--primary-light);
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .read-more-link:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .read-more-link i {
+            margin-left: 0.3rem;
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        .read-more-link:hover i {
+            transform: translateX(3px);
+        }
+        .alert-info {
+            background-color: #e0f2fe;
+            border-color: #bae6fd;
+            color: #0c4a6e;
+            border-radius: 8px;
+        }
+        /* Modern modal styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-footer {
+            border-top: 1px solid #f1f5f9;
+            padding: 1.25rem 1.5rem;
+        }
+        .list-group-item {
+            border-color: #f1f5f9;
+            padding: 1rem 1.25rem;
+        }
+        .list-group-item:hover {
+            background-color: #f8fafc;
+        }
+        /* Button styles */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            border-color: #ef4444;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+        .btn-secondary {
+            background-color: #9ca3af;
+            border-color: #9ca3af;
+        }
+        /* Add pulse animation to recent searches */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .stock-chip.pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Go To Top Button Styles */
+        #goToTopBtn {
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        #goToTopBtn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #goToTopBtn:not(.visible) {
+            transform: translateY(20px);
+        }
+        #goToTopBtn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+        #goToTopBtn:active {
+            transform: translateY(0);
+        }
+        
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 6px;
+            border: 3px solid var(--bg-light);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <h1 class="text-white text-center mb-4">Indian Stock News Tracker</h1>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form id="searchForm" class="d-flex">
+                        <input type="text" id="stockInput" class="form-control me-2" placeholder="Enter stock name (e.g., VEDANTA)" required>
+                        <button type="submit" class="btn btn-light me-2">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="button" id="clearBtn" class="btn btn-outline-light me-2" title="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button type="button" id="refreshBtn" class="btn btn-outline-light me-2" title="Force refresh news">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button type="button" id="historyBtn" class="btn btn-outline-light" title="View search history">
+                            <i class="fas fa-history"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Recent Searches section -->
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-10">
+                    <div id="recentSearches" class="d-flex flex-wrap justify-content-center">
+                        <!-- Recent search chips will be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">Search History</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="historyList" class="list-group">
+                            <!-- History items will be inserted here -->
+                        </div>
+                        <div id="noHistory" class="text-center mt-3 d-none">
+                            <p>No search history found</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="clearHistoryBtn" class="btn btn-danger">Clear History</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-primary fw-medium">Fetching latest news...</p>
+        </div>
+
+        <div class="error-message alert alert-danger"></div>
+
+        <div id="newsContainer" class="row justify-content-center">
+            <!-- News cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Go to top button -->
+    <button id="goToTopBtn" class="btn btn-primary rounded-circle position-fixed" style="bottom: 30px; right: 30px; width: 50px; height: 50px; z-index: 1000;">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize Bootstrap modal
+        const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+        
+        // Client-side cache for already fetched news
+        const clientCache = new Map();
+        
+        // Show history modal
+        document.getElementById('historyBtn').addEventListener('click', async () => {
+            await loadHistory();
+            historyModal.show();
+        });
+        
+        // Clear history
+        document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/history', {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Clear history list
+                    document.getElementById('historyList').innerHTML = '';
+                    document.getElementById('noHistory').classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Error clearing history:', error);
+            }
+        });
+        
+        // Load search history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                if (!response.ok) {
+                    throw new Error('Failed to load history');
+                }
+                
+                let history = await response.json();
+                const historyList = document.getElementById('historyList');
+                const noHistory = document.getElementById('noHistory');
+                
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    noHistory.classList.remove('d-none');
+                    return;
+                }
+                
+                noHistory.classList.add('d-none');
+                
+                // Filter history to show only the most recent search for each stock
+                // Create a map to store the most recent search for each stock
+                const stockMap = new Map();
+                
+                // Process history in reverse chronological order
+                history.reverse().forEach(item => {
+                    // Convert stock symbol to uppercase for case-insensitive comparison
+                    const stockSymbol = item.stock.toUpperCase();
+                    
+                    // Only keep the first (most recent) occurrence of each stock
+                    if (!stockMap.has(stockSymbol)) {
+                        stockMap.set(stockSymbol, item);
+                    }
+                });
+                
+                // Convert map values back to an array
+                const uniqueHistory = Array.from(stockMap.values());
+                
+                // Display each unique stock in the history list
+                uniqueHistory.forEach(item => {
+                    const date = new Date(item.timestamp).toLocaleString();
+                    const historyItem = document.createElement('a');
+                    historyItem.href = '#';
+                    historyItem.className = 'list-group-item list-group-item-action';
+                    historyItem.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${item.stock}</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-danger delete-item" data-stock="${item.stock}" title="Delete this item">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <small class="ms-2">${item.count} results</small>
+                            </div>
+                        </div>
+                        <small class="text-muted">${date}</small>
+                    `;
+                    
+                    historyItem.addEventListener('click', (e) => {
+                        // Only proceed if the click wasn't on the delete button
+                        if (!e.target.closest('.delete-item')) {
+                            e.preventDefault();
+                            document.getElementById('stockInput').value = item.stock;
+                            historyModal.hide();
+                            
+                            // Use false for forceRefresh to ensure we use cache if available
+                            fetchNews(item.stock, false);
+                        }
+                    });
+                    
+                    historyList.appendChild(historyItem);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-item').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const stock = button.getAttribute('data-stock');
+                        await deleteHistoryItem(stock);
+                        await loadHistory(); // Reload history after deletion
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading history:', error);
+                document.getElementById('noHistory').classList.remove('d-none');
+            }
+        }
+        
+        // Function to delete a specific history item
+        async function deleteHistoryItem(stock) {
+            try {
+                const response = await fetch(`/api/history/${encodeURIComponent(stock)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete history item');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error(`Error deleting history item for ${stock}:`, error);
+                return false;
+            }
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const stock = document.getElementById('stockInput').value.trim();
+            if (!stock) return;
+
+            // Don't force refresh by default
+            await fetchNews(stock, false);
+        });
+        
+        // Add refresh button functionality
+        document.getElementById('refreshBtn').addEventListener('click', async () => {
+            const stock = document.getElementById('stockInput').value.trim();
+            if (!stock) return;
+            
+            // Force refresh when refresh button is clicked
+            await fetchNews(stock, true);
+        });
+        
+        // Reusable function to fetch news
+        async function fetchNews(stock, forceRefresh) {
+            // Show loading
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.error-message').style.display = 'none';
+            document.getElementById('newsContainer').innerHTML = '';
+            
+            // Check client cache first for instant display
+            if (!forceRefresh && clientCache.has(stock)) {
+                console.log(`Using client-side cache for ${stock}`);
+                const cachedData = clientCache.get(stock);
+                displayNews(cachedData);
+                document.querySelector('.loading').style.display = 'none';
+                
+                // Perform a background refresh if the cache is older than 5 minutes
+                const cacheTime = cachedData.timestamp || 0;
+                const now = Date.now();
+                if (now - cacheTime > 5 * 60 * 1000) { // 5 minutes
+                    console.log(`Cache is older than 5 minutes. Refreshing in background.`);
+                    refreshInBackground(stock);
+                }
+                return;
+            }
+            
+            let params = `stock=${encodeURIComponent(stock)}`;
+            if (forceRefresh) {
+                params += `&force_refresh=true`;
+            }
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Add timestamp to the data for client-side cache management
+                    data.timestamp = Date.now();
+                    
+                    // Save to client-side cache
+                    clientCache.set(stock, data);
+                    
+                    displayNews(data);
+                    // Update recent searches after a successful search
+                    updateRecentSearchesDisplay();
+                } else {
+                    throw new Error(data.error || 'Failed to fetch news');
+                }
+            } catch (error) {
+                document.querySelector('.error-message').textContent = error.message;
+                document.querySelector('.error-message').style.display = 'block';
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+        
+        // Refresh data in background without affecting the UI
+        async function refreshInBackground(stock) {
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `stock=${encodeURIComponent(stock)}&force_refresh=true&background=true`
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Add timestamp to the data
+                    data.timestamp = Date.now();
+                    
+                    // Update client-side cache
+                    clientCache.set(stock, data);
+                    
+                    console.log(`Background refresh for ${stock} completed.`);
+                    
+                    // Only update the UI if the current displayed stock is the one we refreshed
+                    const currentStock = document.getElementById('stockInput').value.trim();
+                    if (currentStock.toUpperCase() === stock.toUpperCase()) {
+                        displayNews(data);
+                    }
+                }
+            } catch (error) {
+                console.error(`Background refresh error for ${stock}:`, error);
+            }
+        }
+
+        function displayNews(data) {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = '';
+
+            // Check if data exists and extract news array
+            if (!data) {
+                container.innerHTML = '<div class="col-12 text-center"><p>No data received from server.</p></div>';
+                return;
+            }
+
+            // Display cache status indicator if data was from cache
+            if (data.cached) {
+                const cacheIndicator = document.createElement('div');
+                cacheIndicator.className = 'col-12 mb-3';
+                cacheIndicator.innerHTML = `
+                    <div class="alert alert-info d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span>Showing cached results from previous search.</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshCacheBtn">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+                `;
+                container.appendChild(cacheIndicator);
+                
+                // Add refresh functionality to the cache indicator button
+                document.getElementById('refreshCacheBtn').addEventListener('click', () => {
+                    const stock = document.getElementById('stockInput').value.trim();
+                    if (stock) {
+                        fetchNews(stock, true); // Force refresh
+                    }
+                });
+            }
+
+            // Extract news data from response
+            let news = [];
+            if (Array.isArray(data)) {
+                news = data;
+            } else if (data.news && Array.isArray(data.news)) {
+                news = data.news;
+            } else if (typeof data === 'object') {
+                // If it's some other object structure, try to extract news
+                console.log("Data structure:", data);
+                news = data.news || [];
+            }
+
+            console.log("News data:", news); // Debug log to see the extracted news
+
+            if (!Array.isArray(news) || news.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="p-5 bg-white rounded-3 shadow-sm">
+                            <i class="fas fa-newspaper text-muted" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3 mb-2">No news found</h4>
+                            <p class="text-muted">We couldn't find any news for this stock. Try another search term.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            news.forEach(item => {
+                if (!item) return; // Skip null or undefined items
+                
+                const date = new Date(item.published_at || new Date()).toLocaleString();
+                const card = document.createElement('div');
+                card.className = 'col-md-8 mb-3';
+                card.innerHTML = `
+                    <div class="news-card">
+                        <h5 class="card-title">${item.title || 'No Title'}</h5>
+                        <p class="card-text">${item.description || 'No description available'}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-newspaper me-2 text-primary"></i>
+                                <span class="news-source">${item.source || 'Unknown Source'}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="far fa-clock me-2 text-muted"></i>
+                            <span class="news-date">${date}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a href="${item.url || '#'}" target="_blank" class="read-more-link">
+                                Read full article <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Clear search functionality
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            // Clear the input field
+            document.getElementById('stockInput').value = '';
+            
+            // Show welcome message
+            showWelcomeMessage();
+            
+            // Focus back on the input field
+            document.getElementById('stockInput').focus();
+        });
+        
+        // Function to update recent searches display on homepage
+        async function updateRecentSearchesDisplay() {
+            try {
+                const response = await fetch('/api/history');
+                if (!response.ok) {
+                    throw new Error('Failed to load history');
+                }
+                
+                let history = await response.json();
+                const recentSearches = document.getElementById('recentSearches');
+                recentSearches.innerHTML = '';
+                
+                // No need to show anything if there's no history
+                if (history.length === 0) {
+                    return;
+                }
+                
+                // Filter to show only unique stocks (most recent first)
+                const stockMap = new Map();
+                history.reverse().forEach(item => {
+                    const stockSymbol = item.stock.toUpperCase();
+                    if (!stockMap.has(stockSymbol)) {
+                        stockMap.set(stockSymbol, item);
+                    }
+                });
+                
+                // Get the 5 most recent unique stocks
+                const recentStocks = Array.from(stockMap.values()).slice(0, 5);
+                
+                // Add a label first
+                if (recentStocks.length > 0) {
+                    const label = document.createElement('div');
+                    label.className = 'text-white me-2 d-flex align-items-center';
+                    label.innerHTML = 'Recent: ';
+                    recentSearches.appendChild(label);
+                }
+                
+                // Create a chip for each recent stock
+                recentStocks.forEach(item => {
+                    const chip = document.createElement('div');
+                    chip.className = 'badge bg-light text-dark me-2 mb-2 p-2 stock-chip d-flex align-items-center';
+                    chip.style.cursor = 'pointer';
+                    
+                    // Create wrapper for stock name to allow proper clicking
+                    const stockNameSpan = document.createElement('span');
+                    stockNameSpan.textContent = item.stock;
+                    stockNameSpan.className = 'stock-name';
+                    stockNameSpan.style.marginRight = '6px';
+                    
+                    // Create remove icon
+                    const removeIcon = document.createElement('i');
+                    removeIcon.className = 'fas fa-times-circle remove-chip';
+                    removeIcon.style.fontSize = '0.8rem';
+                    removeIcon.style.opacity = '0.6';
+                    removeIcon.style.transition = 'all 0.2s ease';
+                    removeIcon.title = `Remove ${item.stock} from recent searches`;
+                    
+                    // Add hover effect for remove icon
+                    removeIcon.addEventListener('mouseover', () => {
+                        removeIcon.style.opacity = '1';
+                        removeIcon.style.color = '#ef4444';
+                    });
+                    
+                    removeIcon.addEventListener('mouseout', () => {
+                        removeIcon.style.opacity = '0.6';
+                        removeIcon.style.color = '';
+                    });
+                    
+                    // Add elements to chip
+                    chip.appendChild(stockNameSpan);
+                    chip.appendChild(removeIcon);
+                    
+                    // Click handler for stock name - show stock news
+                    stockNameSpan.addEventListener('click', () => {
+                        const stockSymbol = item.stock;
+                        document.getElementById('stockInput').value = stockSymbol;
+                        
+                        // Check client-side cache first for immediate display
+                        if (clientCache.has(stockSymbol)) {
+                            console.log(`Using client cache for ${stockSymbol} from chip click`);
+                            const cachedData = clientCache.get(stockSymbol);
+                            
+                            // Display cached data immediately
+                            displayNews(cachedData);
+                            
+                            // Refresh in background if older than 5 minutes
+                            const cacheTime = cachedData.timestamp || 0;
+                            const now = Date.now();
+                            if (now - cacheTime > 5 * 60 * 1000) {
+                                console.log(`Cache is older than 5 minutes. Starting background refresh.`);
+                                refreshInBackground(stockSymbol);
+                            }
+                        } else {
+                            // No client cache, fetch normally
+                            fetchNews(stockSymbol, false);
+                        }
+                    });
+                    
+                    // Click handler for remove icon - remove from recent
+                    removeIcon.addEventListener('click', async (e) => {
+                        e.stopPropagation(); // Prevent triggering the chip click
+                        const stockSymbol = item.stock;
+                        
+                        // Delete this stock from history
+                        await deleteHistoryItem(stockSymbol);
+                        
+                        // Update the display of recent searches
+                        updateRecentSearchesDisplay();
+                        
+                        // If the current input matches the removed stock, clear it
+                        if (document.getElementById('stockInput').value.trim().toUpperCase() === stockSymbol.toUpperCase()) {
+                            document.getElementById('clearBtn').click();
+                        }
+                    });
+                    
+                    recentSearches.appendChild(chip);
+                });
+            } catch (error) {
+                console.error('Error loading recent searches:', error);
+            }
+        }
+        
+        // Check if server has cached results for a stock
+        async function checkServerCache(stock) {
+            try {
+                const response = await fetch(`/api/cache-status/${encodeURIComponent(stock)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.hasCache;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking cache status:', error);
+                return false;
+            }
+        }
+        
+        // Show welcome message when no search has been made yet
+        function showWelcomeMessage() {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = `
+                <div class="col-12 mb-4">
+                    <div class="p-4 bg-white rounded-3 shadow-sm" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="mb-0 fw-bold" style="color: var(--primary-color);">Market Updates</h3>
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-primary" onclick="document.getElementById('stockInput').focus()">
+                                    <i class="fas fa-search me-2"></i>Search Stocks
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <ul class="nav nav-tabs mb-3" id="marketTabs" role="tablist" style="border-bottom: 2px solid rgba(241, 245, 249, 0.5); gap: 0.5rem;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="nifty-tab" data-bs-toggle="tab" data-bs-target="#nifty-content" type="button" role="tab" style="border: none; padding: 0.8rem 1.2rem; border-radius: 10px 10px 0 0;">
+                                    <i class="fas fa-chart-line me-2"></i>Nifty 50
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="dowjones-tab" data-bs-toggle="tab" data-bs-target="#dowjones-content" type="button" role="tab" style="border: none; padding: 0.8rem 1.2rem; border-radius: 10px 10px 0 0;">
+                                    <i class="fas fa-chart-bar me-2"></i>Dow Jones
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content pt-3" id="marketTabContent">
+                            <div class="tab-pane fade show active" id="nifty-content" role="tabpanel">
+                                <div id="nifty-news-container" class="p-3">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-3 text-primary fw-medium">Loading Nifty 50 news...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="dowjones-content" role="tabpanel">
+                                <div id="dowjones-news-container" class="p-3">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-3 text-primary fw-medium">Loading Dow Jones news...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load default news for major indices
+            loadDefaultIndexNews();
+        }
+        
+        // Load news for major indices
+        async function loadDefaultIndexNews() {
+            // Load Nifty 50 news
+            try {
+                if (clientCache.has('NIFTY50')) {
+                    // Use cached data if available
+                    displayIndexNews('nifty-news-container', clientCache.get('NIFTY50').news, 'Nifty 50');
+                } else {
+                    // Otherwise fetch fresh data
+                    const niftyResponse = await fetch('/search', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'stock=NIFTY50'
+                    });
+                    
+                    if (niftyResponse.ok) {
+                        const data = await niftyResponse.json();
+                        // Cache the data
+                        data.timestamp = Date.now();
+                        clientCache.set('NIFTY50', data);
+                        // Display the news
+                        displayIndexNews('nifty-news-container', data.news, 'Nifty 50');
+                    } else {
+                        document.getElementById('nifty-news-container').innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Unable to load Nifty 50 news at this time.
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading Nifty 50 news:', error);
+                document.getElementById('nifty-news-container').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading Nifty 50 news: ${error.message}
+                    </div>
+                `;
+            }
+            
+            // Load Dow Jones news
+            try {
+                if (clientCache.has('DOWJONES')) {
+                    // Use cached data if available
+                    displayIndexNews('dowjones-news-container', clientCache.get('DOWJONES').news, 'Dow Jones');
+                } else {
+                    // Otherwise fetch fresh data
+                    const dowResponse = await fetch('/search', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'stock=DOWJONES'
+                    });
+                    
+                    if (dowResponse.ok) {
+                        const data = await dowResponse.json();
+                        // Cache the data
+                        data.timestamp = Date.now();
+                        clientCache.set('DOWJONES', data);
+                        // Display the news
+                        displayIndexNews('dowjones-news-container', data.news, 'Dow Jones');
+                    } else {
+                        document.getElementById('dowjones-news-container').innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Unable to load Dow Jones news at this time.
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading Dow Jones news:', error);
+                document.getElementById('dowjones-news-container').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading Dow Jones news: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Display news for an index in a compact format
+        function displayIndexNews(containerId, news, indexName) {
+            const container = document.getElementById(containerId);
+            
+            if (!Array.isArray(news) || news.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info" style="border-radius: 12px; border: none; background: rgba(224, 242, 254, 0.6); backdrop-filter: blur(4px);">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No recent news found for ${indexName}.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Display up to 5 news items in a compact format
+            container.innerHTML = '';
+            const newsItems = news.slice(0, 5); // Take only first 5 news items
+            
+            newsItems.forEach((item, index) => {
+                if (!item) return;
+                
+                const date = new Date(item.published_at || new Date()).toLocaleString();
+                const newsItem = document.createElement('div');
+                newsItem.className = 'card mb-3 border-0 shadow-sm hover-card';
+                newsItem.style.borderRadius = '16px';
+                newsItem.style.transition = 'all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1)';
+                newsItem.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+                newsItem.style.opacity = '0';
+                
+                newsItem.innerHTML = `
+                    <div class="card-body p-3">
+                        <h6 class="mb-2 fw-bold" style="color: var(--primary-color);">${item.title || 'No Title'}</h6>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-light text-dark me-2" style="background: rgba(241, 245, 249, 0.7) !important; font-weight: 500;">
+                                    <i class="fas fa-newspaper me-1"></i>${item.source || 'Unknown'}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="far fa-clock me-1"></i>${date}
+                                </small>
+                            </div>
+                            <a href="${item.url || '#'}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                                <i class="fas fa-external-link-alt me-1"></i>Read
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                // Add hover effect
+                newsItem.addEventListener('mouseenter', () => {
+                    newsItem.style.transform = 'translateY(-4px)';
+                    newsItem.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.08)';
+                    newsItem.style.borderLeft = '3px solid var(--primary-light)';
+                });
+                
+                newsItem.addEventListener('mouseleave', () => {
+                    newsItem.style.transform = 'translateY(0)';
+                    newsItem.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.05)';
+                    newsItem.style.borderLeft = '';
+                });
+                
+                container.appendChild(newsItem);
+            });
+            
+            // Add a "View All" link that will search for this index
+            const viewAllLink = document.createElement('div');
+            viewAllLink.className = 'text-center mt-4';
+            viewAllLink.innerHTML = `
+                <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="loadFullIndexNews('${indexName === 'Nifty 50' ? 'NIFTY50' : 'DOWJONES'}')">
+                    <i class="fas fa-chevron-circle-down me-1"></i>View all ${indexName} news
+                </button>
+            `;
+            container.appendChild(viewAllLink);
+        }
+        
+        // Function to load the full news for an index
+        function loadFullIndexNews(indexSymbol) {
+            document.getElementById('stockInput').value = indexSymbol;
+            fetchNews(indexSymbol, false);
+        }
+        
+        // Show welcome message on initial load if no stock is being searched
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRecentSearchesDisplay();
+            if (!document.getElementById('stockInput').value) {
+                showWelcomeMessage();
+            }
+            
+            // Set up go to top button
+            const goToTopBtn = document.getElementById('goToTopBtn');
+            
+            // Show button when scrolling down 300px from the top
+            window.addEventListener('scroll', () => {
+                if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                    goToTopBtn.classList.add('visible');
+                } else {
+                    goToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            // Scroll to top when button clicked
+            goToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

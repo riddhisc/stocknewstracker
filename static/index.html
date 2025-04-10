@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock News Fetcher</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stock News Fetcher</h1>
+            <div class="search-container">
+                <input type="text" id="stock-input" placeholder="Enter stock symbol...">
+                <button id="search-btn">Search</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="news">News</button>
+            <button class="tab-btn" data-tab="history">History</button>
+        </div>
+
+        <div class="tab-content">
+            <div id="news-tab" class="tab-pane active">
+                <div id="loading" class="hidden">Loading...</div>
+                <div id="news-container"></div>
+            </div>
+            
+            <div id="history-tab" class="tab-pane">
+                <div id="history-container">
+                    <div class="history-header">
+                        <h2>Search History</h2>
+                        <button id="clear-history" class="clear-btn">Clear History</button>
+                    </div>
+                    <div id="history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/history.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
