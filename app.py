@@ -37,14 +37,84 @@ scheduler_thread.daemon = True
 scheduler_thread.start()
 
 def load_history():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, 'r') as f:
-            return json.load(f)
-    return []
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    try:
+        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"Could not read search history: {exc}")
+        return []
 
 def save_history(history):
-    with open(HISTORY_FILE, 'w') as f:
+    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
         json.dump(history, f)
+
+SYMBOLS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'symbols.json')
+
+def load_symbols():
+    try:
+        with open(SYMBOLS_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"Could not read symbol list: {exc}")
+        return []
+    symbols = []
+    seen = set()
+    for item in data if isinstance(data, list) else []:
+        if not isinstance(item, dict):
+            continue
+        symbol = str(item.get('symbol', '')).strip().upper()
+        name = str(item.get('name', '')).strip()
+        if not symbol or not name or symbol in seen:
+            continue
+        seen.add(symbol)
+        symbols.append({'symbol': symbol, 'name': name})
+    return symbols
+
+SYMBOLS = load_symbols()
+_symbols_mtime = None
+
+def get_symbols():
+    """Reload the local list when symbols.json changes, without a manual restart."""
+    global SYMBOLS, _symbols_mtime
+    try:
+        mtime = os.path.getmtime(SYMBOLS_PATH)
+    except OSError:
+        return SYMBOLS
+    if mtime != _symbols_mtime:
+        SYMBOLS = load_symbols()
+        _symbols_mtime = mtime
+    return SYMBOLS
+
+def match_symbols(query, limit=12):
+    q = (query or '').strip().lower()
+    if not q:
+        return []
+    buckets = {key: [] for key in ('symbol_prefix', 'name_prefix', 'symbol_contains', 'name_contains')}
+    for item in get_symbols():
+        symbol = item['symbol'].lower()
+        name = item['name'].lower()
+        if symbol.startswith(q):
+            buckets['symbol_prefix'].append(item)
+        elif name.startswith(q):
+            buckets['name_prefix'].append(item)
+        elif q in symbol:
+            buckets['symbol_contains'].append(item)
+        elif q in name:
+            buckets['name_contains'].append(item)
+    results = []
+    seen = set()
+    for key in ('symbol_prefix', 'name_prefix', 'symbol_contains', 'name_contains'):
+        for item in sorted(buckets[key], key=lambda row: (row['symbol'], row['name'])):
+            if item['symbol'] in seen:
+                continue
+            seen.add(item['symbol'])
+            results.append({'symbol': item['symbol'], 'name': item['name']})
+            if len(results) >= limit:
+                return results
+    return results
 
 @app.route('/')
 def home():
@@ -119,6 +189,10 @@ def search():
             'history': load_history()
         }), 500
 
+@app.route('/api/suggest')
+def suggest_symbols():
+    return jsonify(match_symbols(request.args.get('q', '')))
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     return jsonify(load_history())
@@ -142,22 +216,14 @@ def delete_history_item(stock):
 
 @app.route('/api/cache-status/<stock>', methods=['GET'])
 def check_cache_status(stock):
-    """Check if a stock has cached news data available"""
-    has_cache = stock in news_cache
-    
-    # For cached items, update the timestamp to extend their life
-    if has_cache:
-        current_time = time.time()
-        data, old_timestamp = news_cache[stock]
-        
-        # Update the timestamp to extend cache life if it's older than 1 minute
-        if current_time - old_timestamp > 60:
-            print(f"Extending cache life for {stock}")
-            news_cache[stock] = (data, current_time)
-    
+    """Check if a stock has cached news data available.
+
+    The app cache stores a list of articles. An older version of this route
+    unpacked that list as (data, timestamp) and crashed whenever a stock was cached.
+    """
     return jsonify({
         "stock": stock,
-        "hasCache": has_cache
+        "hasCache": stock in news_cache
     })
 
 @app.route('/api/news', methods=['GET'])
@@ -178,5 +244,11 @@ def get_news():
     return jsonify({'news': news})
 
 if __name__ == '__main__':
-    # For local development
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000))) 
+    # For local development. Ignore history writes so a search does not
+    # restart the reloader and drop the in-memory news cache.
+    app.run(
+        debug=True,
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', 5000)),
+        exclude_patterns=['*search_history.json'],
+    ) 

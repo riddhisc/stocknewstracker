@@ -8,6 +8,7 @@ import json
 import feedparser
 from urllib.parse import quote_plus
 import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class NewsFetcher:
     def __init__(self):
@@ -63,9 +64,9 @@ class NewsFetcher:
         self.news_cache = {}
         self.cache_expiry = 300  # 5 minutes
         
-        # Rate limiting
+        # Rate limiting. A multi-second gap made every search feel stuck.
         self.last_request_time = {}
-        self.min_request_interval = 2  # seconds between requests to the same domain
+        self.min_request_interval = 0
         
         # User agents to rotate
         self.user_agents = [
@@ -86,7 +87,7 @@ class NewsFetcher:
         parsed_url = urlparse(url)
         return parsed_url.netloc
 
-    def make_request(self, url, max_retries=3, timeout=10):
+    def make_request(self, url, max_retries=1, timeout=6):
         """Make HTTP requests with retry logic and proper error handling"""
         domain = self.get_domain(url)
         
@@ -123,14 +124,6 @@ class NewsFetcher:
         
         for attempt in range(max_retries):
             try:
-                if attempt > 0:
-                    # Exponential backoff with jitter
-                    wait_time = min(2 ** attempt + (0.1 * attempt), 10)
-                    time.sleep(wait_time)
-                
-                # Add a small random delay to avoid detection
-                time.sleep(random.uniform(0.5, 1.5))
-                
                 response = requests.get(url, headers=headers, timeout=timeout)
                 
                 if response.status_code == 200:
@@ -139,9 +132,8 @@ class NewsFetcher:
                     else:
                         print(f"Response too short for URL: {url}")
                 elif response.status_code == 429:
-                    wait_time = min(2 ** attempt, 30)
-                    print(f"Rate limited. Waiting {wait_time} seconds before retry...")
-                    time.sleep(wait_time)
+                    print(f"Rate limited for URL: {url}")
+                    return None
                 elif response.status_code == 404:
                     print(f"Page not found (404) for URL: {url}")
                     return None
@@ -150,23 +142,17 @@ class NewsFetcher:
                     return None
                 elif response.status_code == 503:
                     print(f"Service unavailable (503) for URL: {url}")
-                    # For 503 errors, wait longer before retrying
-                    time.sleep(min(5 * (attempt + 1), 20))
+                    return None
                 elif response.status_code == 403:
                     print(f"Access forbidden (403) for URL: {url}")
-                    # For 403 errors, try with a different user agent
-                    headers['User-Agent'] = self.get_random_user_agent()
-                    time.sleep(min(3 * (attempt + 1), 15))
+                    return None
                 else:
                     print(f"Request failed with status code {response.status_code} for URL: {url}")
                     if attempt < max_retries - 1:
                         time.sleep(1)
             except requests.exceptions.Timeout:
                 print(f"Request timed out for URL: {url}")
-                # For timeouts, increase the timeout for the next attempt
-                timeout = min(timeout * 1.5, 30)
-                if attempt < max_retries - 1:
-                    time.sleep(1)
+                return None
             except requests.exceptions.ConnectionError:
                 print(f"Connection error for URL: {url}")
                 if attempt < max_retries - 1:
@@ -333,6 +319,76 @@ class NewsFetcher:
                 print(f"Could not parse RSS date: {date_str}, using current time instead")
                 return datetime.now()
 
+    def _article_from_rss_entry(self, entry, search_term):
+        if not hasattr(entry, 'title') or not entry.title.strip():
+            return None
+        published_at_str = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+        if hasattr(entry, 'published'):
+            try:
+                published_at_str = self.parse_rss_date(entry.published).strftime('%Y-%m-%dT%H:%M:%SZ')
+            except Exception as e:
+                print(f"Error parsing date '{entry.published}': {str(e)}")
+        source = 'Google News'
+        if hasattr(entry, 'source') and hasattr(entry.source, 'title'):
+            source = entry.source.title
+        return {
+            'title': entry.title,
+            'description': entry.summary if hasattr(entry, 'summary') else f"News about {search_term}",
+            'url': entry.link,
+            'source': source,
+            'published_at': published_at_str,
+            'type': 'rss'
+        }
+
+    def _google_news_rss(self, query, limit=12):
+        """One Google News RSS request. This is the fast path for search."""
+        articles = []
+        try:
+            rss_url = (
+                "https://news.google.com/rss/search?q="
+                f"{quote_plus(query)}&hl=en-IN&gl=IN&ceid=IN:en"
+            )
+            response = self.make_request(rss_url)
+            if not response or response.status_code != 200:
+                return articles
+            feed = feedparser.parse(response.text)
+            for entry in feed.entries[:limit]:
+                try:
+                    article = self._article_from_rss_entry(entry, query)
+                    if article:
+                        articles.append(article)
+                except Exception as e:
+                    print(f"Error processing Google News entry: {str(e)}")
+        except Exception as e:
+            print(f"Error fetching from Google News RSS: {str(e)}")
+        return articles
+
+    def _fetch_queries_parallel(self, queries, limit=12):
+        articles = []
+        if not queries:
+            return articles
+        workers = min(4, len(queries))
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(self._google_news_rss, query, limit) for query in queries]
+            for future in as_completed(futures):
+                try:
+                    articles.extend(future.result())
+                except Exception as e:
+                    print(f"Error fetching news query: {str(e)}")
+        return articles
+
+    def _store_news(self, key, all_news, current_time):
+        seen_urls = set()
+        unique_news = []
+        for news in all_news:
+            if news['url'] not in seen_urls:
+                seen_urls.add(news['url'])
+                unique_news.append(news)
+        unique_news.sort(key=lambda x: x['published_at'], reverse=True)
+        self.news_cache[key] = (unique_news, current_time)
+        print(f"Returning {len(unique_news)} news items for {key}")
+        return unique_news
+
     def fetch_news(self, stock, days_back=7):
         """Fetch news for a given stock from multiple sources"""
         # Special case for market indices
@@ -384,6 +440,14 @@ class NewsFetcher:
                 search_terms.append('Infosys')
                 
         print(f"Search terms for {stock}: {search_terms}")
+
+        # Google News RSS covers the usual sources in one or two requests.
+        # The site scrapers below stay as a fallback when RSS returns nothing.
+        fast_news = self._fetch_queries_parallel(
+            [f"{term} stock market" for term in search_terms[:2]]
+        )
+        if fast_news:
+            return self._store_news(stock, fast_news, current_time)
         
         # Try each search term
         for i, search_term in enumerate(search_terms):
@@ -790,6 +854,13 @@ class NewsFetcher:
         else:
             # Default to the index name as the only search term
             search_terms = [index_name]
+
+        # Two RSS queries in parallel. Skip the extra page scrapes when this is enough.
+        fast_news = self._fetch_queries_parallel(
+            [f"{term} market" for term in search_terms[:2]]
+        )
+        if fast_news:
+            return self._store_news(index_name, fast_news, current_time)
         
         # Try different news sources with each search term
         for search_term in search_terms:
