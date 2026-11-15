@@ -1,0 +1,72 @@
+# Second customer. Point CONFIG_PATH at this file. No code change.
+# US names, RSS plus NewsAPI, Indian page scrapers turned off.
+# Still not data/watchlist.json (that file feeds the results scripts).
+cache_ttl_seconds: 600
+indices:
+  - id: DOWJONES
+    label: Dow Jones
+watchlist:
+  - name: Apple
+    ticker: AAPL
+    aliases:
+      - Apple
+      - AAPL
+  - name: Microsoft
+    ticker: MSFT
+    aliases:
+      - Microsoft
+      - MSFT
+  - name: JPMorgan Chase
+    ticker: JPM
+    aliases:
+      - JPMorgan
+      - JPM
+sources:
+  - name: google_news_rss
+    enabled: true
+    priority: 1
+    timeout: 6
+  - name: newsapi
+    enabled: true
+    priority: 2
+    timeout: 8
+  - name: yahoo_finance
+    enabled: false
+    priority: 10
+    timeout: 6
+  - name: economic_times
+    enabled: false
+    priority: 20
+    timeout: 6
+  - name: economic_times_nifty
+    enabled: false
+    priority: 21
+    timeout: 6
+  - name: livemint
+    enabled: false
+    priority: 30
+    timeout: 6
+  - name: google_news_html
+    enabled: false
+    priority: 40
+    timeout: 6
+  - name: reuters
+    enabled: false
+    priority: 50
+    timeout: 6
+  - name: financial_express
+    enabled: false
+    priority: 60
+    timeout: 6
+  - name: ndtv
+    enabled: false
+    priority: 70
+    timeout: 6
+  - name: marketwatch
+    enabled: true
+    priority: 80
+    timeout: 6
+  - name: cnbc
+    enabled: true
+    priority: 90
+    timeout: 6

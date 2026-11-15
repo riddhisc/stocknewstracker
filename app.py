@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
+from config_loader import load_config
 from news_fetcher import NewsFetcher
 import schedule
 import time
@@ -21,7 +22,13 @@ news_fetcher = NewsFetcher()
 # One cache shape for every stock: {"data": [articles], "fetched_at": unix time}.
 # Readers must use cache_get(); the value is not a tuple.
 news_cache = {}
-NEWS_CACHE_TTL_SECONDS = 15 * 60
+# config.yaml is the news desk. data/watchlist.json is the results calendar
+# read by scripts/refresh_results.py. They are not the same list.
+APP_CONFIG = load_config()
+NEWS_CACHE_TTL_SECONDS = APP_CONFIG.cache_ttl_seconds
+news_fetcher.set_cache_ttl(APP_CONFIG.cache_ttl_seconds)
+news_fetcher.apply_source_settings(APP_CONFIG.source_settings)
+news_fetcher.extra_aliases = dict(APP_CONFIG.alias_map)
 
 def cache_put(stock, articles):
     news_cache[stock] = {
@@ -163,7 +170,7 @@ def match_symbols(query, limit=12):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', indices=APP_CONFIG.indices)
 
 @app.route('/favicon.ico')
 def favicon():
@@ -251,6 +258,25 @@ def search():
 def suggest_symbols():
     return jsonify(match_symbols(request.args.get('q', '')))
 
+@app.route('/api/watchlist/news')
+def watchlist_news():
+    """Latest headlines for every name in config.yaml.
+
+    Read-only. data/watchlist.json is a different list: it drives
+    scripts/refresh_results.py and is not read here.
+    """
+    items = []
+    for row in APP_CONFIG.watchlist:
+        news = news_fetcher.fetch_news(row["name"])
+        items.append({
+            "name": row["name"],
+            "ticker": row["ticker"],
+            "aliases": row["aliases"],
+            "news": list(news)[:8],
+            "stale": bool(getattr(news, "stale", False)),
+        })
+    return jsonify({"items": items})
+
 @app.route('/api/history', methods=['GET'])
 def get_history():
     return jsonify(load_history())
@@ -289,7 +315,8 @@ def get_news():
     stock = request.args.get('stock', '')
     if not stock:
         index = request.args.get('index', '')
-        if index in ['NIFTY50', 'DOWJONES']:
+        configured_ids = {item["id"] for item in APP_CONFIG.indices}
+        if index in configured_ids or index in {'NIFTY50', 'DOWJONES'}:
             news = news_fetcher.fetch_index_news(index)
             return jsonify({
                 'news': list(news),

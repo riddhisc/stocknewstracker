@@ -663,6 +663,7 @@
     </button>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script id="desk-config" type="application/json">{{ indices|tojson }}</script>
     <script>
         const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
         const clientCache = new Map();
@@ -1230,7 +1231,30 @@
             }
         }
 
+        function deskIndices() {
+            const node = document.getElementById('desk-config');
+            try {
+                const parsed = JSON.parse(node ? node.textContent || '[]' : '[]');
+                if (Array.isArray(parsed) && parsed.length) return parsed;
+            } catch (error) {
+                console.error('Could not read desk indices', error);
+            }
+            return [
+                {id: 'NIFTY50', label: 'Nifty 50'},
+                {id: 'DOWJONES', label: 'Dow Jones'}
+            ];
+        }
+
         function showWelcomeMessage() {
+            const indices = deskIndices();
+            const tabs = indices.map((item, i) => `
+                <button class="seg-btn nav-link${i === 0 ? ' active' : ''}" id="tab-${esc(item.id)}" data-bs-toggle="tab" data-bs-target="#pane-${esc(item.id)}" type="button" role="tab">${esc(item.label)}</button>
+            `).join('');
+            const panes = indices.map((item, i) => `
+                <div class="tab-pane fade${i === 0 ? ' show active' : ''}" id="pane-${esc(item.id)}" role="tabpanel">
+                    <div id="index-${esc(item.id)}"><p class="waiting">Loading ${esc(item.label)}…</p></div>
+                </div>
+            `).join('');
             document.getElementById('newsContainer').innerHTML = `
                 <section class="desk">
                     <div class="desk-head">
@@ -1240,83 +1264,49 @@
                         </div>
                         <button type="button" class="text-btn" onclick="document.getElementById('stockInput').focus()">Search a ticker</button>
                     </div>
-                    <div class="seg" role="tablist">
-                        <button class="seg-btn nav-link active" id="nifty-tab" data-bs-toggle="tab" data-bs-target="#nifty-content" type="button" role="tab">Nifty 50</button>
-                        <button class="seg-btn nav-link" id="dowjones-tab" data-bs-toggle="tab" data-bs-target="#dowjones-content" type="button" role="tab">Dow Jones</button>
-                    </div>
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="nifty-content" role="tabpanel">
-                            <div id="nifty-news-container"><p class="waiting">Loading Nifty 50…</p></div>
-                        </div>
-                        <div class="tab-pane fade" id="dowjones-content" role="tabpanel">
-                            <div id="dowjones-news-container"><p class="waiting">Loading Dow Jones…</p></div>
-                        </div>
-                    </div>
+                    <div class="seg" role="tablist">${tabs}</div>
+                    <div class="tab-content">${panes}</div>
                 </section>`;
             loadDefaultIndexNews();
         }
 
         async function loadDefaultIndexNews() {
-            try {
-                if (clientCache.has('NIFTY50')) {
-                    const cachedNifty = clientCache.get('NIFTY50');
-                    displayIndexNews('nifty-news-container', cachedNifty.news, 'Nifty 50', cachedNifty.cached || cachedNifty.stale);
-                } else {
-                    const niftyResponse = await fetch('/search', {
+            for (const item of deskIndices()) {
+                const boxId = 'index-' + item.id;
+                try {
+                    if (clientCache.has(item.id)) {
+                        const cached = clientCache.get(item.id);
+                        displayIndexNews(boxId, cached.news, item.label, cached.cached || cached.stale, item.id);
+                        continue;
+                    }
+                    const response = await fetch('/search', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'stock=NIFTY50'
+                        body: 'stock=' + encodeURIComponent(item.id)
                     });
-                    if (niftyResponse.ok) {
-                        const data = await niftyResponse.json();
-                        data.timestamp = Date.now();
-                        clientCache.set('NIFTY50', data);
-                        displayIndexNews('nifty-news-container', data.news, 'Nifty 50', data.cached || data.stale);
-                        updateRecentSearchesDisplay();
-                    } else {
-                        document.getElementById('nifty-news-container').innerHTML = `
-                            <div class="state state-compact"><h3>Nifty 50 is unavailable</h3><p>Try again in a moment.</p></div>`;
+                    const box = document.getElementById(boxId);
+                    if (!response.ok) {
+                        if (box) {
+                            box.innerHTML = `<div class="state state-compact"><h3>${esc(item.label)} is unavailable</h3><p>Try again in a moment.</p></div>`;
+                        }
+                        continue;
                     }
-                }
-            } catch (error) {
-                console.error('Error loading Nifty 50 news:', error);
-                const niftyBox = document.getElementById('nifty-news-container');
-                if (niftyBox) {
-                    niftyBox.innerHTML = `<div class="state"><h3>Nifty 50 is unavailable</h3><p>${esc(error.message)}</p></div>`;
-                }
-            }
-
-            try {
-                if (clientCache.has('DOWJONES')) {
-                    const cachedDow = clientCache.get('DOWJONES');
-                    displayIndexNews('dowjones-news-container', cachedDow.news, 'Dow Jones', cachedDow.cached || cachedDow.stale);
-                } else {
-                    const dowResponse = await fetch('/search', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'stock=DOWJONES'
-                    });
-                    if (dowResponse.ok) {
-                        const data = await dowResponse.json();
-                        data.timestamp = Date.now();
-                        clientCache.set('DOWJONES', data);
-                        displayIndexNews('dowjones-news-container', data.news, 'Dow Jones', data.cached || data.stale);
-                        updateRecentSearchesDisplay();
-                    } else {
-                        document.getElementById('dowjones-news-container').innerHTML = `
-                            <div class="state"><h3>Dow Jones is unavailable</h3><p>Try again in a moment.</p></div>`;
+                    const data = await response.json();
+                    data.timestamp = Date.now();
+                    clientCache.set(item.id, data);
+                    displayIndexNews(boxId, data.news, item.label, data.cached || data.stale, item.id);
+                    updateRecentSearchesDisplay();
+                } catch (error) {
+                    console.error('Error loading index news:', error);
+                    const box = document.getElementById(boxId);
+                    if (box) {
+                        box.innerHTML = `<div class="state"><h3>${esc(item.label)} is unavailable</h3><p>${esc(error.message)}</p></div>`;
                     }
-                }
-            } catch (error) {
-                console.error('Error loading Dow Jones news:', error);
-                const dowBox = document.getElementById('dowjones-news-container');
-                if (dowBox) {
-                    dowBox.innerHTML = `<div class="state"><h3>Dow Jones is unavailable</h3><p>${esc(error.message)}</p></div>`;
                 }
             }
         }
 
-        function displayIndexNews(containerId, news, indexName, earlier) {
+        function displayIndexNews(containerId, news, indexName, earlier, indexId) {
             const container = document.getElementById(containerId);
             if (!container) return;
 
@@ -1329,13 +1319,13 @@
                 return;
             }
 
-            const symbol = indexName === 'Nifty 50' ? 'NIFTY50' : 'DOWJONES';
+            const symbol = indexId || (indexName === 'Nifty 50' ? 'NIFTY50' : 'DOWJONES');
             let html = '';
             if (earlier) {
                 html += `<div class="cache-note"><span>Showing an earlier copy of these headlines.</span></div>`;
             }
             html += news.slice(0, 5).filter(Boolean).map(storyHtml).join('');
-            html += `<p style="margin: 8px 0 16px;"><button type="button" class="text-btn" onclick="loadFullIndexNews('${symbol}')">All ${esc(indexName)} stories</button></p>`;
+            html += `<p style="margin: 8px 0 16px;"><button type="button" class="text-btn" onclick="loadFullIndexNews('${esc(symbol)}')">All ${esc(indexName)} stories</button></p>`;
             container.innerHTML = html;
         }
 

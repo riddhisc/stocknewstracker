@@ -73,6 +73,10 @@ A web application that aggregates news for Indian stocks from public RSS feeds, 
 
 2. Push to any cloud provider that supports Docker containers
 
+## Two watchlists
+
+`config.yaml` chooses the headlines on the desk and on `GET /api/watchlist/news` (names, tickers, and aliases such as Reliance / RELIANCE.NS / RIL). `data/watchlist.json` is separate: `scripts/refresh_results.py` uses it for quarterly results. Changing one file does not change the other.
+
 ## Environment Variables
 
 - `PORT`: Port number for the application (default: 5000)

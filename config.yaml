@@ -1,0 +1,114 @@
+# News desk for this deployment. Copy config.example.yaml to start a new one,
+# or point CONFIG_PATH at another file such as config.client_b.example.yaml.
+#
+# This watchlist is not data/watchlist.json. The JSON file is the quarterly
+# results list used by scripts/refresh_results.py and scripts/send_reminders.py.
+# Editing this file does not change result dates, and editing the JSON does
+# not change which headlines /api/watchlist/news returns.
+cache_ttl_seconds: 900
+indices:
+  - id: NIFTY50
+    label: Nifty 50
+  - id: DOWJONES
+    label: Dow Jones
+watchlist:
+  - name: Reliance Industries
+    ticker: RELIANCE.NS
+    aliases:
+      - Reliance
+      - RELIANCE
+      - RIL
+  - name: Tata Consultancy Services
+    ticker: TCS.NS
+    aliases:
+      - TCS
+      - Tata Consultancy
+  - name: HDFC Bank
+    ticker: HDFCBANK.NS
+    aliases:
+      - HDFC Bank
+      - HDFCBANK
+  - name: Infosys
+    ticker: INFY.NS
+    aliases:
+      - Infosys
+      - INFY
+  - name: ICICI Bank
+    ticker: ICICIBANK.NS
+    aliases:
+      - ICICI Bank
+      - ICICIBANK
+  - name: State Bank of India
+    ticker: SBIN.NS
+    aliases:
+      - SBI
+      - SBIN
+      - State Bank of India
+  - name: Bharti Airtel
+    ticker: BHARTIARTL.NS
+    aliases:
+      - Bharti Airtel
+      - BHARTIARTL
+  - name: Larsen & Toubro
+    ticker: LT.NS
+    aliases:
+      - LT
+      - Larsen & Toubro
+  - name: ITC
+    ticker: ITC.NS
+    aliases:
+      - ITC
+  - name: Hindustan Unilever
+    ticker: HINDUNILVR.NS
+    aliases:
+      - Hindustan Unilever
+      - HINDUNILVR
+sources:
+  - name: google_news_rss
+    enabled: true
+    priority: 1
+    timeout: 6
+  - name: yahoo_finance
+    enabled: true
+    priority: 10
+    timeout: 6
+  - name: economic_times
+    enabled: true
+    priority: 20
+    timeout: 6
+  - name: economic_times_nifty
+    enabled: true
+    priority: 21
+    timeout: 6
+  - name: livemint
+    enabled: true
+    priority: 30
+    timeout: 6
+  - name: google_news_html
+    enabled: true
+    priority: 40
+    timeout: 6
+  - name: reuters
+    enabled: true
+    priority: 50
+    timeout: 6
+  - name: financial_express
+    enabled: true
+    priority: 60
+    timeout: 6
+  - name: ndtv
+    enabled: true
+    priority: 70
+    timeout: 6
+  - name: marketwatch
+    enabled: true
+    priority: 80
+    timeout: 6
+  - name: cnbc
+    enabled: true
+    priority: 90
+    timeout: 6
+  - name: newsapi
+    enabled: false
+    priority: 100
+    timeout: 8
