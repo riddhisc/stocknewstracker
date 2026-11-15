@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#141210">
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('stock-tracker-theme') === 'blue') {
+                    document.documentElement.setAttribute('data-theme', 'blue');
+                    var meta = document.querySelector('meta[name="theme-color"]');
+                    if (meta) meta.setAttribute('content', '#111111');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <title>Indian Stock News Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -11,7 +22,7 @@
         :root {
             --ink: #141210;
             --ink-soft: #3a342c;
-            --paper: #f3eee6;
+            --paper: #f6f1e7;
             --card: #fffdf8;
             --line: #e3dacb;
             --muted: #6f675c;
@@ -19,6 +30,50 @@
             --amber-deep: #8a5a10;
             --cream: #f7f3ea;
             --danger: #8f3d2b;
+            --on-accent: #141210;
+            --accent-hover: #f0ad45;
+            --ghost-border: #4a433a;
+            --mast-muted: #c7bbaa;
+            --suggest-hover: #f6ead2;
+            --placeholder: #9a9084;
+            --finder-border: #2a261f;
+            --icon-hover: #f3eee6;
+            --chip-bg: #141210;
+            --chip-fg: #f7f3ea;
+            --chip-bd: #141210;
+            --chip-mark: #e09a2b;
+            --pick-bg: #e09a2b;
+            --pick-fg: #141210;
+            --skeleton: #e7e0d4;
+            --ink-press: #2a241c;
+        }
+
+        html[data-theme="blue"] {
+            --ink: #111111;
+            --ink-soft: #2c2c2c;
+            --paper: #F7F8FC;
+            --card: #ffffff;
+            --line: #E4E6EB;
+            --muted: #6B6E76;
+            --amber: #1B19E6;
+            --amber-deep: #1210C4;
+            --cream: #ffffff;
+            --on-accent: #ffffff;
+            --accent-hover: #1513C9;
+            --ghost-border: #3A3A3A;
+            --mast-muted: #B7B9C2;
+            --suggest-hover: #EEF0F6;
+            --placeholder: #8B8E98;
+            --finder-border: #3A3A3A;
+            --icon-hover: #F7F8FC;
+            --chip-bg: #1B19E6;
+            --chip-fg: #ffffff;
+            --chip-bd: #1B19E6;
+            --chip-mark: #ffffff;
+            --pick-bg: #1B19E6;
+            --pick-fg: #ffffff;
+            --skeleton: #E6E8EE;
+            --ink-press: #111111;
         }
 
         * { box-sizing: border-box; }
@@ -35,7 +90,7 @@
         h1, h2, h3, p { margin: 0; }
 
         .sheet {
-            width: min(880px, calc(100% - 28px));
+            width: min(1120px, calc(100% - 28px));
             margin: 0 auto;
         }
 
@@ -47,7 +102,7 @@
 
         .mast-top {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 16px;
             margin-bottom: 16px;
@@ -65,7 +120,7 @@
             height: 38px;
             border-radius: 9px;
             background: var(--amber);
-            color: var(--ink);
+            color: var(--on-accent);
             font-weight: 800;
             display: grid;
             place-items: center;
@@ -78,7 +133,7 @@
             font-size: 0.72rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #c7bbaa;
+            color: var(--mast-muted);
             margin-bottom: 3px;
         }
 
@@ -98,7 +153,7 @@
             gap: 8px;
             background: transparent;
             color: var(--cream);
-            border: 1px solid #4a433a;
+            border: 1px solid var(--ghost-border);
             border-radius: 999px;
             padding: 8px 14px;
             font-weight: 600;
@@ -107,6 +162,36 @@
         }
 
         .ghost-btn:hover { border-color: var(--amber); color: var(--amber); }
+        a.ghost-btn { text-decoration: none; }
+
+        .theme-switch {
+            position: relative;
+            align-self: flex-start;
+            width: 46px;
+            height: 26px;
+            flex: none;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #e09a2b 0 50%, #1B19E6 50% 100%);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+            cursor: pointer;
+        }
+
+        .theme-switch::after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+            transition: transform 0.18s ease;
+        }
+
+        html[data-theme="blue"] .theme-switch::after { transform: translateX(20px); }
 
         .finder {
             display: flex;
@@ -114,8 +199,9 @@
             gap: 6px;
             background: var(--card);
             border-radius: 14px;
-            padding: 6px;
-            border: 1px solid #2a261f;
+            padding: 10px;
+            min-height: 68px;
+            border: 1px solid var(--finder-border);
             position: relative;
             z-index: 5;
         }
@@ -154,12 +240,12 @@
             font: inherit;
         }
 
-        .suggest-row:hover { background: #f6ead2; }
+        .suggest-row:hover { background: var(--suggest-hover); }
 
         .suggest-row.is-active,
         .suggest-row.is-active:hover {
-            background: var(--amber);
-            color: var(--ink);
+            background: var(--pick-bg);
+            color: var(--pick-fg);
         }
 
         .suggest-name {
@@ -175,7 +261,7 @@
             color: var(--amber-deep);
         }
 
-        .suggest-row.is-active .suggest-symbol { color: var(--ink); }
+        .suggest-row.is-active .suggest-symbol { color: var(--pick-fg); }
 
         .suggest-empty {
             padding: 12px 14px;
@@ -195,19 +281,20 @@
             background: transparent;
             color: var(--ink);
             font-size: 1.05rem;
-            padding: 10px 12px;
+            padding: 12px 14px;
             font-family: inherit;
         }
 
         .finder input:focus { outline: none; }
-        .finder input::placeholder { color: #9a9084; }
+        .finder input::placeholder { color: var(--placeholder); }
 
         .btn-go {
             background: var(--amber);
-            color: var(--ink);
+            color: var(--on-accent);
             border: 0;
             border-radius: 10px;
-            padding: 10px 16px;
+            padding: 12px 18px;
+            min-height: 48px;
             font-weight: 800;
             letter-spacing: 0.01em;
             cursor: pointer;
@@ -217,11 +304,11 @@
             white-space: nowrap;
         }
 
-        .btn-go:hover { background: #f0ad45; }
+        .btn-go:hover { background: var(--accent-hover); }
 
         .icon-btn {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             flex: none;
             border: 0;
             border-radius: 10px;
@@ -230,7 +317,7 @@
             cursor: pointer;
         }
 
-        .icon-btn:hover { background: #f3eee6; color: var(--ink); }
+        .icon-btn:hover { background: var(--icon-hover); color: var(--ink); }
 
         .finder.is-busy { opacity: 0.7; pointer-events: none; }
         .finder.is-busy #refreshBtn i { animation: spin 0.7s linear infinite; }
@@ -269,7 +356,7 @@
             gap: 8px;
             background: transparent;
             color: var(--ink);
-            border: 1px solid #d5cbbd;
+            border: 1px solid var(--line);
             border-radius: 999px;
             padding: 7px 10px 7px 12px;
             font-weight: 700;
@@ -281,10 +368,10 @@
         .stock-chip:hover { border-color: var(--ink); }
 
         .stock-chip.is-current {
-            background: var(--ink);
-            color: var(--cream);
-            border-color: var(--ink);
-            box-shadow: inset 0 -2px 0 var(--amber);
+            background: var(--chip-bg);
+            color: var(--chip-fg);
+            border-color: var(--chip-bd);
+            box-shadow: inset 0 -2px 0 var(--chip-mark);
         }
 
         .remove-chip {
@@ -294,7 +381,7 @@
         }
 
         .stock-chip:hover .remove-chip { opacity: 1; color: var(--danger); }
-        .stock-chip.is-current .remove-chip { color: var(--amber); opacity: 0.9; }
+        .stock-chip.is-current .remove-chip { color: var(--chip-fg); opacity: 0.9; }
 
         .results-head {
             display: grid;
@@ -368,7 +455,7 @@
         }
 
         .story-dek {
-            color: #4e483f;
+            color: var(--ink-soft);
             font-size: 0.95rem;
             line-height: 1.45;
             margin-bottom: 12px;
@@ -377,6 +464,24 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        .story-note {
+            color: var(--ink-soft);
+            font-size: 0.95rem;
+            line-height: 1.45;
+            margin: 0 0 12px;
+        }
+
+        .sentiment {
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        .sentiment-positive { color: #2f6b45; }
+        .sentiment-neutral { color: var(--muted); }
+        .sentiment-negative { color: var(--danger); }
 
         .story-meta {
             display: flex;
@@ -421,7 +526,7 @@
 
         .state p { color: var(--muted); line-height: 1.45; }
 
-        .state-error { border-color: #e4cfc6; }
+        .state-error { border-color: var(--line); }
         .state-error h3 { color: var(--danger); }
 
         .btn-retry {
@@ -435,7 +540,7 @@
             cursor: pointer;
         }
 
-        .btn-retry:hover { background: #2a241c; }
+        .btn-retry:hover { background: var(--ink-press); }
 
         .loading { margin-top: 16px; }
 
@@ -443,7 +548,7 @@
             height: 92px;
             border-radius: 14px;
             margin-bottom: 10px;
-            background: #e7e0d4;
+            background: var(--skeleton);
             animation: sheen 1.2s ease-in-out infinite;
         }
 
@@ -499,6 +604,155 @@
             color: var(--cream) !important;
         }
 
+        .desk .tab-content > .tab-pane {
+            display: none;
+        }
+
+        .desk .tab-content > .tab-pane.active {
+            display: block;
+        }
+
+        .markets-now, .results-desk {
+            margin-bottom: 22px;
+        }
+
+        .markets-now h2, .results-desk h2 {
+            font-family: Georgia, "Palatino Linotype", Palatino, serif;
+            font-size: 1.7rem;
+            letter-spacing: -0.03em;
+            margin: 0;
+        }
+
+        .now-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+
+        .pulse-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+            align-items: stretch;
+        }
+
+        .pulse {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 132px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px 12px 10px;
+        }
+
+        .pulse h3 {
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .pulse-link {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .pulse-title {
+            font-family: Georgia, "Palatino Linotype", Palatino, serif;
+            font-size: 16px;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            overflow-wrap: break-word;
+        }
+
+        .pulse-link:hover .pulse-title { color: var(--amber-deep); }
+
+        .pulse-meta {
+            margin-top: auto;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0;
+            text-transform: none;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pulse-wait {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .now-card, .result-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .now-card h3, .result-card h3 {
+            font-family: Georgia, "Palatino Linotype", Palatino, serif;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+            margin: 0 0 8px;
+        }
+
+        .now-card h3 a { color: inherit; text-decoration: none; }
+        .now-card h3 a:hover { color: var(--amber); }
+
+        .result-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .when-badge {
+            flex: none;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 4px 8px;
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .when-badge.is-past, .when-badge.is-unknown {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--line);
+        }
+
+        .result-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 22px;
+            margin: 10px 0 4px;
+            color: var(--ink-soft);
+            font-size: 0.92rem;
+        }
+
+        .result-metrics span { color: var(--muted); display: block; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        .results-note { color: var(--muted); margin: 6px 0 0; }
+
+        .stale-warn { color: var(--danger); font-weight: 700; }
+
         .waiting { color: var(--muted); padding: 12px 2px; }
 
         .modal-content {
@@ -543,7 +797,7 @@
         .modal-footer .btn-secondary {
             background: transparent;
             color: var(--ink);
-            border-color: #d5cbbd;
+            border-color: var(--line);
             border-radius: 999px;
         }
 
@@ -574,6 +828,9 @@
             display: flex;
             gap: 8px;
             flex: none;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: flex-start;
         }
 
         .status-panel {
@@ -623,6 +880,8 @@
             .story-link { margin-left: 0; }
             .results-symbol { font-size: 1.6rem; }
             .desk-head { align-items: flex-start; flex-direction: column; }
+            .pulse-grid { grid-template-columns: 1fr; }
+            .pulse { min-height: 0; }
         }
     </style>
 </head>
@@ -646,6 +905,11 @@
                         <i class="fas fa-history"></i>
                         <span>History</span>
                     </button>
+                    <a class="ghost-btn" href="/results" title="Quarterly results">
+                        <i class="fas fa-chart-column"></i>
+                        <span>Results</span>
+                    </a>
+                    <button type="button" class="theme-switch" id="themeToggle" aria-label="Switch theme" aria-pressed="false"></button>
                 </div>
             </div>
             <form id="searchForm" class="finder" role="search">
@@ -667,6 +931,25 @@
     </header>
 
     <main class="sheet">
+        <section id="marketsNow" class="markets-now" aria-labelledby="marketsNowTitle"{% if circulating_stale %} data-stale="1"{% endif %}>
+            <p class="eyebrow">Markets now</p>
+            <h2 id="marketsNowTitle">What is circulating</h2>
+            <div id="marketsNowList" class="pulse-grid">
+                {% for card in circulating %}
+                <section class="pulse" data-topic="{{ card.id }}">
+                    <h3>{{ card.title }}</h3>
+                    {% if card.url %}
+                    <a class="pulse-link" href="{{ card.url }}" target="_blank" rel="noopener noreferrer">
+                        <span class="pulse-title">{{ card.headline }}</span>
+                        <span class="pulse-meta">{{ card.source }}{% if card.when %} · {{ card.when }}{% endif %}</span>
+                    </a>
+                    {% else %}
+                    <p class="pulse-wait">Updating</p>
+                    {% endif %}
+                </section>
+                {% endfor %}
+            </div>
+        </section>
         <section id="statusPanel" class="status-panel" hidden aria-live="polite">
             <p class="eyebrow">System status</p>
             <p id="statusOverall" class="status-overall">Checking…</p>
@@ -690,6 +973,17 @@
         </div>
 
         <div id="newsContainer"></div>
+
+        <section id="resultsDesk" class="results-desk" aria-labelledby="resultsTitle">
+            <div class="desk-head">
+                <div>
+                    <p class="eyebrow">Results</p>
+                    <h2 id="resultsTitle">Upcoming results</h2>
+                </div>
+            </div>
+            <p id="resultsUpdated" class="results-note"></p>
+            <div id="resultsList" class="now-list"></div>
+        </section>
     </main>
 
     <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
@@ -788,6 +1082,11 @@
                 && !dek.includes('news.google.com/rss')
                 && !repeatsTitle;
             const description = showDek ? `<p class="story-dek">${esc(dek)}</p>` : '';
+            const note = item.llm_summary ? `<p class="story-note">${esc(item.llm_summary)}</p>` : '';
+            const moods = {positive: 1, neutral: 1, negative: 1};
+            const mood = moods[item.sentiment]
+                ? `<span class="sentiment sentiment-${item.sentiment}">${esc(item.sentiment)}</span>`
+                : '';
             const source = esc(item.source || 'Unknown source');
             const when = esc(formatWhen(item.published_at));
             const full = esc(new Date(item.published_at || Date.now()).toLocaleString());
@@ -796,8 +1095,10 @@
                 <article class="story">
                     <h2 class="story-title">${title}</h2>
                     ${description}
+                    ${note}
                     <div class="story-meta">
                         <span class="story-source">${source}</span>
+                        ${mood}
                         <time title="${full}">${when}</time>
                         <a class="story-link" href="${href}" target="_blank" rel="noopener noreferrer">Read article</a>
                     </div>
@@ -1201,8 +1502,9 @@
             if (Array.isArray(data)) news = data;
             else if (data.news && Array.isArray(data.news)) news = data.news;
             else if (typeof data === 'object') news = data.news || [];
+            news = realStories(news);
 
-            if (!Array.isArray(news) || news.length === 0) {
+            if (news.length === 0) {
                 container.innerHTML = `
                     <div class="state">
                         <h3>No headlines for this ticker</h3>
@@ -1356,17 +1658,33 @@
             ];
         }
 
+        function showDeskTab(indexId) {
+            const root = document.getElementById('newsContainer');
+            if (!root) return;
+            root.querySelectorAll('.seg-btn').forEach((btn) => {
+                const on = btn.dataset.index === indexId;
+                btn.classList.toggle('active', on);
+                btn.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            root.querySelectorAll('.tab-pane').forEach((pane) => {
+                const on = pane.dataset.index === indexId;
+                pane.classList.toggle('active', on);
+                pane.classList.toggle('show', on);
+            });
+        }
+
         function showWelcomeMessage() {
             const indices = deskIndices();
             const tabs = indices.map((item, i) => `
-                <button class="seg-btn nav-link${i === 0 ? ' active' : ''}" id="tab-${esc(item.id)}" data-bs-toggle="tab" data-bs-target="#pane-${esc(item.id)}" type="button" role="tab">${esc(item.label)}</button>
+                <button class="seg-btn nav-link${i === 0 ? ' active' : ''}" id="tab-${esc(item.id)}" data-index="${esc(item.id)}" type="button" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}">${esc(item.label)}</button>
             `).join('');
             const panes = indices.map((item, i) => `
-                <div class="tab-pane fade${i === 0 ? ' show active' : ''}" id="pane-${esc(item.id)}" role="tabpanel">
+                <div class="tab-pane${i === 0 ? ' show active' : ''}" id="pane-${esc(item.id)}" data-index="${esc(item.id)}" role="tabpanel">
                     <div id="index-${esc(item.id)}"><p class="waiting">Loading ${esc(item.label)}…</p></div>
                 </div>
             `).join('');
-            document.getElementById('newsContainer').innerHTML = `
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = `
                 <section class="desk">
                     <div class="desk-head">
                         <div>
@@ -1378,6 +1696,9 @@
                     <div class="seg" role="tablist">${tabs}</div>
                     <div class="tab-content">${panes}</div>
                 </section>`;
+            container.querySelectorAll('.seg-btn').forEach((btn) => {
+                btn.addEventListener('click', () => showDeskTab(btn.dataset.index));
+            });
             loadDefaultIndexNews();
         }
 
@@ -1417,11 +1738,17 @@
             }
         }
 
+        function realStories(list) {
+            if (!Array.isArray(list)) return [];
+            return list.filter(item => item && item.type !== 'info' && item.title);
+        }
+
         function displayIndexNews(containerId, news, indexName, earlier, indexId) {
             const container = document.getElementById(containerId);
             if (!container) return;
+            news = realStories(news);
 
-            if (!Array.isArray(news) || news.length === 0) {
+            if (news.length === 0) {
                 container.innerHTML = `
                     <div class="state">
                         <h3>No recent ${esc(indexName)} headlines</h3>
@@ -1445,7 +1772,92 @@
             fetchNews(indexSymbol, false);
         }
 
+        function quietSource(source) {
+            const text = String(source || '').trim();
+            if (!text || /^(bing news|bing|unknown source)$/i.test(text)) return 'Bing';
+            return text;
+        }
+
+        function pulseColumn(section) {
+            const item = realStories(section.news)[0];
+            const href = item ? safeHref(item.url) : '';
+            const when = item && item.published_at ? formatWhen(item.published_at) : '';
+            const body = item && href !== '#'
+                ? `<a class="pulse-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><span class="pulse-title">${esc(item.title)}</span><span class="pulse-meta">${esc(quietSource(item.source))}${when ? ' · ' + esc(when) : ''}</span></a>`
+                : '<p class="pulse-wait">Updating</p>';
+            return `<section class="pulse" data-topic="${esc(section.id)}"><h3>${esc(section.title)}</h3>${body}</section>`;
+        }
+
+        function paintTrending(sections) {
+            const box = document.getElementById('marketsNowList');
+            if (!box || !sections || !sections.length) return;
+            box.innerHTML = sections.map(pulseColumn).join('');
+        }
+
+        function loadMarketsNow(followUp) {
+            fetch('/api/markets-now')
+                .then((response) => response.ok ? response.json() : Promise.reject(new Error('markets')))
+                .then((data) => {
+                    paintTrending(data.sections);
+                    if (data.stale && !followUp) setTimeout(() => loadMarketsNow(true), 4000);
+                })
+                .catch(() => {});
+        }
+
+        function formatFigure(value) {
+            if (value === null || value === undefined || value === '') return '—';
+            const number = Number(value);
+            if (!Number.isFinite(number)) return '—';
+            const abs = Math.abs(number);
+            if (abs >= 1e7) {
+                return (number / 1e7).toLocaleString('en-IN', { maximumFractionDigits: 1 }) + ' cr';
+            }
+            return number.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        }
+
+        function loadResults() {
+            const list = document.getElementById('resultsList');
+            const stamp = document.getElementById('resultsUpdated');
+            fetch('/api/results')
+                .then((response) => response.ok ? response.json() : Promise.reject(new Error('results')))
+                .then((data) => {
+                    if (!data || data.missing || !Array.isArray(data.items) || !data.items.length) {
+                        stamp.textContent = '';
+                        list.innerHTML = '<p class="results-note">No results file yet.</p>';
+                        return;
+                    }
+                    const when = data.updated_at ? formatWhen(data.updated_at) : 'unknown';
+                    stamp.innerHTML = `Data last updated: ${esc(when)}` + (data.stale ? ' <span class="stale-warn">Figures are more than three days old or marked stale.</span>' : '');
+                    list.innerHTML = data.items.map((item) => {
+                        const badgeClass = item.when === 'date passed' ? 'is-past' : (item.when === 'date unknown' ? 'is-unknown' : '');
+                        const period = item.latest_period ? esc(item.latest_period) : 'Latest quarter';
+                        const href = esc(safeHref(item.source_url));
+                        return `
+                            <article class="result-card">
+                                <div class="result-top">
+                                    <h3>${esc(item.name || item.symbol)} <span class="story-source">${esc(item.symbol)}</span></h3>
+                                    <span class="when-badge ${badgeClass}">${esc(item.when || 'date unknown')}</span>
+                                </div>
+                                <p class="results-note">${item.next_date ? esc(item.next_date) : 'No date'}${item.next_period ? ' · ' + esc(item.next_period) : ''}</p>
+                                <div class="result-metrics">
+                                    <div><span>Revenue</span>${esc(formatFigure(item.revenue))}</div>
+                                    <div><span>Net profit</span>${esc(formatFigure(item.net_profit))}</div>
+                                    <div><span>EPS · ${period}</span>${esc(formatFigure(item.eps))}</div>
+                                </div>
+                                <a class="story-link" href="${href}" target="_blank" rel="noopener noreferrer">Open source</a>
+                            </article>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {
+                    stamp.textContent = '';
+                    list.innerHTML = '<p class="results-note">No results file yet.</p>';
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            loadMarketsNow();
+            loadResults();
             updateRecentSearchesDisplay();
             if (!document.getElementById('stockInput').value) showWelcomeMessage();
 
@@ -1461,6 +1873,30 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
+
+        (function () {
+            var key = 'stock-tracker-theme';
+            function current() {
+                try { return localStorage.getItem(key) === 'blue' ? 'blue' : 'paper'; }
+                catch (e) { return 'paper'; }
+            }
+            var toggle = document.getElementById('themeToggle');
+            function paint(theme) {
+                if (theme === 'blue') document.documentElement.setAttribute('data-theme', 'blue');
+                else document.documentElement.removeAttribute('data-theme');
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', theme === 'blue' ? '#111111' : '#141210');
+                if (toggle) toggle.setAttribute('aria-pressed', theme === 'blue' ? 'true' : 'false');
+            }
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    var theme = current() === 'blue' ? 'paper' : 'blue';
+                    try { localStorage.setItem(key, theme); } catch (e) {}
+                    paint(theme);
+                });
+            }
+            paint(current());
+        })();
     </script>
 </body>
 </html>

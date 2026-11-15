@@ -10,7 +10,7 @@ from sources.base import Article, NewsSource, utc_now_iso
 from sources.dates import parse_rss_date, to_iso
 
 
-def articles_from_feed(xml_text, query, limit=12):
+def articles_from_feed(xml_text, query, limit=12, default_source="Google News"):
     feed = feedparser.parse(xml_text or "")
     articles = []
     for entry in feed.entries[:limit]:
@@ -27,10 +27,14 @@ def articles_from_feed(xml_text, query, limit=12):
                 published = utc_now_iso()
         elif getattr(entry, "published", None):
             published = to_iso(parse_rss_date(entry.published))
-        source = "Google News"
+        source = default_source
         entry_source = getattr(entry, "source", None)
         if entry_source is not None and getattr(entry_source, "title", None):
             source = entry_source.title
+        # Bing puts the publisher in News:Source, which feedparser exposes as news_source.
+        news_source = getattr(entry, "news_source", None)
+        if isinstance(news_source, str) and news_source.strip():
+            source = news_source.strip()
         link = getattr(entry, "link", "") or ""
         summary = getattr(entry, "summary", "") or f"News about {query}"
         articles.append(
@@ -61,3 +65,19 @@ class GoogleNewsRssSource(NewsSource):
     def fetch(self, query: str) -> list[Article]:
         response = self.http.get(self.build_url(query), timeout=self.timeout)
         return articles_from_feed(response.text, query)
+
+
+class BingNewsRssSource(NewsSource):
+    """Query RSS that robots.txt allows. Google News disallows /rss for this agent."""
+
+    name = "bing_news_rss"
+    scopes = frozenset({"rss"})
+    default_priority = 2
+    default_timeout = 8
+
+    def build_url(self, query):
+        return "https://www.bing.com/news/search?q=" + quote_plus(query) + "&format=rss"
+
+    def fetch(self, query: str) -> list[Article]:
+        response = self.http.get(self.build_url(query), timeout=self.timeout)
+        return articles_from_feed(response.text, query, default_source="Bing News")

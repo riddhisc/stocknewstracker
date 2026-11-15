@@ -35,7 +35,7 @@ class SmokeTests(unittest.TestCase):
             "url": "https://example.com/tcs",
             "source": "Test",
             "published_at": "2026-11-14T00:00:00Z",
-            "type": "info",
+            "type": "rss",
         }]
         with patch.object(app.news_fetcher, "fetch_news", return_value=sample):
             response = self.client.post("/search", data={"stock": "TCS"})

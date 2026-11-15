@@ -1,12 +1,50 @@
 [
-  {"symbol": "RELIANCE", "name": "Reliance Industries Ltd."},
-  {"symbol": "TCS", "name": "Tata Consultancy Services Ltd."},
-  {"symbol": "HDFCBANK", "name": "HDFC Bank Ltd."},
-  {"symbol": "INFY", "name": "Infosys Ltd."},
-  {"symbol": "ICICIBANK", "name": "ICICI Bank Ltd."},
-  {"symbol": "SBIN", "name": "State Bank of India"},
-  {"symbol": "BHARTIARTL", "name": "Bharti Airtel Ltd."},
-  {"symbol": "LT", "name": "Larsen & Toubro Ltd."},
-  {"symbol": "ITC", "name": "ITC Ltd."},
-  {"symbol": "HINDUNILVR", "name": "Hindustan Unilever Ltd."}
+  {
+    "symbol": "RELIANCE",
+    "name": "Reliance Industries Ltd."
+  },
+  {
+    "symbol": "TCS",
+    "name": "Tata Consultancy Services Ltd."
+  },
+  {
+    "symbol": "HDFCBANK",
+    "name": "HDFC Bank Ltd."
+  },
+  {
+    "symbol": "INFY",
+    "name": "Infosys Ltd."
+  },
+  {
+    "symbol": "ICICIBANK",
+    "name": "ICICI Bank Ltd."
+  },
+  {
+    "symbol": "SBIN",
+    "name": "State Bank of India"
+  },
+  {
+    "symbol": "BHARTIARTL",
+    "name": "Bharti Airtel Ltd."
+  },
+  {
+    "symbol": "LT",
+    "name": "Larsen & Toubro Ltd."
+  },
+  {
+    "symbol": "ITC",
+    "name": "ITC Ltd."
+  },
+  {
+    "symbol": "HINDUNILVR",
+    "name": "Hindustan Unilever Ltd."
+  },
+  {
+    "symbol": "KPIGREEN",
+    "name": "KPI Green Energy Ltd."
+  },
+  {
+    "symbol": "AFFLE",
+    "name": "Affle 3i Ltd."
+  }
 ]

@@ -8,3 +8,5 @@ gunicorn==27.0.1
 feedparser==6.0.14
 flask-cors==6.0.5
 PyYAML==6.0.2
+pytest==9.2.0
+ruff==0.17.5

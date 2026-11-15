@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Google News</title>
+    <item>
+      <title>Reliance raises capex</title>
+      <link>https://example.com/reliance-capex?utm_source=news</link>
+      <pubDate>Tue, 08 Apr 2025 10:24:09 GMT</pubDate>
+      <description>The company lifted spending for the year.</description>
+      <source>Mint</source>
+    </item>
+    <item>
+      <title>   </title>
+      <link>https://example.com/blank</link>
+    </item>
+    <item>
+      <title>Bank credit stays firm</title>
+      <link>https://example.com/bank-credit</link>
+      <pubDate>Mon, 07 Apr 2025 06:00:00 GMT</pubDate>
+      <description>Lenders reported steady loan growth.</description>
+    </item>
+  </channel>
+</rss>

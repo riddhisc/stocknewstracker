@@ -148,6 +148,90 @@ def fy_period(period_end):
     return f"{quarter} FY{fy_year % 100:02d}"
 
 
+def fy_label(period_end):
+    return fy_period(period_end).split()[-1]
+
+
+ANNUAL_SOURCE = "yahoo_fundamentals_timeseries"
+
+
+def fetch_annual_rows(symbol, timeout):
+    """Full-year revenue, profit, and EPS from Yahoo's fundamentals timeseries.
+
+    The free series publishes only the annual columns Yahoo still serves
+    (often about four years). Every returned year is kept. Missing years
+    are not filled in.
+    """
+    ticker = f"{symbol}.NS"
+    url = (
+        "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/"
+        f"finance/timeseries/{ticker}"
+    )
+    response = requests.get(
+        url,
+        params={
+            "symbol": ticker,
+            "type": "annualTotalRevenue,annualNetIncome,annualDilutedEPS,annualBasicEPS",
+            "period1": "0",
+            "period2": "2000000000",
+        },
+        headers={"User-Agent": BROWSER_HEADERS["User-Agent"]},
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    results = (response.json().get("timeseries") or {}).get("result") or []
+    by_date = {}
+    for block in results:
+        if not isinstance(block, dict):
+            continue
+        for key, field in (
+            ("annualTotalRevenue", "revenue"),
+            ("annualNetIncome", "net_profit"),
+            ("annualDilutedEPS", "eps"),
+            ("annualBasicEPS", "eps"),
+        ):
+            rows = block.get(key)
+            if not isinstance(rows, list):
+                continue
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                period_end = to_date(row.get("asOfDate"))
+                reported = row.get("reportedValue") if isinstance(row.get("reportedValue"), dict) else {}
+                value = as_float(reported.get("raw"))
+                if period_end is None or value is None:
+                    continue
+                slot = by_date.setdefault(period_end.isoformat(), {
+                    "period_end": period_end.isoformat(),
+                    "period": fy_label(period_end),
+                })
+                if field == "eps" and slot.get("eps") is not None and key == "annualBasicEPS":
+                    continue
+                slot[field] = value
+    return [by_date[key] for key in sorted(by_date, reverse=True)]
+
+
+def apply_annual(block, annual, annual_error, previous):
+    """Attach real annual rows. A failed call keeps an older saved list."""
+    if annual:
+        block["annual"] = annual
+        block["annual_count"] = len(annual)
+        block["annual_source"] = ANNUAL_SOURCE
+        block.pop("annual_error", None)
+        return block
+    if isinstance(previous, dict) and previous.get("annual"):
+        block["annual"] = previous.get("annual")
+        block["annual_count"] = previous.get("annual_count") or len(previous.get("annual") or [])
+        if previous.get("annual_source"):
+            block["annual_source"] = previous.get("annual_source")
+    else:
+        block["annual"] = []
+        block["annual_count"] = 0
+    if annual_error:
+        block["annual_error"] = annual_error
+    return block
+
+
 def call_with_timeout(func, timeout):
     box = {}
 
@@ -443,11 +527,18 @@ def refresh_symbol(symbol, previous, timeout, today, now):
     quarters = []
     earnings_date = None
     yahoo_error = None
+    annual = []
+    annual_error = None
     try:
         quarters, earnings_date = fetch_yfinance(symbol, timeout, today)
     except Exception as exc:
         yahoo_error = f"{exc.__class__.__name__}: {exc}"
         print(f"  Yahoo Finance failed: {yahoo_error}")
+    try:
+        annual = fetch_annual_rows(symbol, timeout)
+    except Exception as exc:
+        annual_error = exc.__class__.__name__
+        print(f"  Yahoo annual history failed: {annual_error}")
 
     date_source = "yahoo" if earnings_date is not None else None
     if earnings_date is None:
@@ -489,6 +580,7 @@ def refresh_symbol(symbol, previous, timeout, today, now):
                     symbol, earnings_date, previous_end, source_url
                 )
             kept["links"] = links
+            apply_annual(kept, annual, annual_error, previous)
             print("  kept previous quarters and marked stale")
             return kept
         block = empty_block(symbol, now, True)
@@ -496,9 +588,10 @@ def refresh_symbol(symbol, previous, timeout, today, now):
         block["next_result"] = next_result_block(symbol, earnings_date, None, source_url)
         if yahoo_error:
             block["error"] = yahoo_error[:300]
+        apply_annual(block, annual, annual_error, previous)
         return block
 
-    return {
+    block = {
         "next_result": next_result_block(symbol, earnings_date, latest_end, links["yahoo"]),
         "quarters": quarters,
         "updated_at": now,
@@ -507,6 +600,8 @@ def refresh_symbol(symbol, previous, timeout, today, now):
         "links": links,
         "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
     }
+    apply_annual(block, annual, annual_error, previous)
+    return block
 
 
 def known_symbols():

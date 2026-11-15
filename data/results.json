@@ -80,6 +80,1433 @@
       "nse": "https://www.nseindia.com/get-quotes/equity?symbol=RELIANCE",
       "screener": "https://www.screener.in/company/RELIANCE/consolidated/"
     },
-    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted"
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 10572190000000.0,
+        "net_profit": 807750000000.0,
+        "eps": 59.69
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 9646930000000.0,
+        "net_profit": 696480000000.0,
+        "eps": 51.47
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 9010640000000.0,
+        "net_profit": 696210000000.0,
+        "eps": 51.45
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 8778350000000.0,
+        "net_profit": 667020000000.0,
+        "eps": 49.295
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "KPIGREEN": {
+    "next_result": {
+      "date": null,
+      "period": null,
+      "source_url": "https://finance.yahoo.com/quote/KPIGREEN.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 6938402000.0,
+        "net_profit": 946328000.0,
+        "eps": 4.32,
+        "revenue_qoq_pct": -12.81,
+        "revenue_yoy_pct": 15.08,
+        "net_profit_qoq_pct": -34.87,
+        "net_profit_yoy_pct": -14.99,
+        "eps_qoq_pct": -41.14,
+        "eps_yoy_pct": -18.18
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 7958089000.0,
+        "net_profit": 1452875000.0,
+        "eps": 7.34,
+        "revenue_qoq_pct": 20.06,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 15.49,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 23.57,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 6628502000.0,
+        "net_profit": 1258006000.0,
+        "eps": 5.94,
+        "revenue_qoq_pct": 4.5,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 7.85,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 8.0,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 6342979000.0,
+        "net_profit": 1166428000.0,
+        "eps": 5.5,
+        "revenue_qoq_pct": 5.2,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 4.78,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 4.17,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 6029429000.0,
+        "net_profit": 1113167000.0,
+        "eps": 5.28,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:01:12+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/KPIGREEN.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/KPIGREEN.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=KPIGREEN",
+      "screener": "https://www.screener.in/company/KPIGREEN/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "eps": 24.04,
+        "net_profit": 4761305000.0,
+        "revenue": 26959099000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "eps": 16.09,
+        "net_profit": 3195771000.0,
+        "revenue": 17354535000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "eps": 9.41,
+        "net_profit": 1616568000.0,
+        "revenue": 10239001000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "eps": 6.5,
+        "net_profit": 1096279000.0,
+        "revenue": 6437863000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "TCS": {
+    "next_result": {
+      "date": "2027-01-11",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/TCS.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 731880000000.0,
+        "net_profit": 138840000000.0,
+        "eps": 38.37,
+        "revenue_qoq_pct": 1.26,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 4.01,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 3.98,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 722750000000.0,
+        "net_profit": 133490000000.0,
+        "eps": 36.9,
+        "revenue_qoq_pct": 2.23,
+        "revenue_yoy_pct": 13.93,
+        "net_profit_qoq_pct": -2.69,
+        "net_profit_yoy_pct": 4.62,
+        "eps_qoq_pct": -2.74,
+        "eps_yoy_pct": 4.62
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 706980000000.0,
+        "net_profit": 137180000000.0,
+        "eps": 37.94,
+        "revenue_qoq_pct": 5.38,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 28.72,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 28.83,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 670870000000.0,
+        "net_profit": 106570000000.0,
+        "eps": 29.45,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 634370000000.0,
+        "net_profit": 127600000000.0,
+        "eps": 35.27,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:19+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/TCS.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/TCS.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=TCS",
+      "screener": "https://www.screener.in/company/TCS/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 2670210000000.0,
+        "eps": 136.01,
+        "net_profit": 492100000000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 2553240000000.0,
+        "eps": 134.19,
+        "net_profit": 485530000000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 2408930000000.0,
+        "eps": 125.88,
+        "net_profit": 459080000000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 2254580000000.0,
+        "eps": 115.19,
+        "net_profit": 421470000000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "HDFCBANK": {
+    "next_result": {
+      "date": "2027-01-16",
+      "period": null,
+      "source_url": "https://finance.yahoo.com/quote/HDFCBANK.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 853464600000.0,
+        "net_profit": 162579100000.0,
+        "eps": 10.56,
+        "revenue_qoq_pct": -10.45,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 5.62,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": 953058900000.0,
+        "net_profit": 153934600000.0,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:23+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/HDFCBANK.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/HDFCBANK.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=HDFCBANK",
+      "screener": "https://www.screener.in/company/HDFCBANK/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "eps": 45.75,
+        "revenue": 2495617500000.0,
+        "net_profit": 704793400000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "eps": 44.82,
+        "revenue": 2371508200000.0,
+        "net_profit": 673508300000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "eps": 44.16,
+        "revenue": 1986934300000.0,
+        "net_profit": 622656600000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "eps": 88.68,
+        "revenue": 1205375000000.0,
+        "net_profit": 495446900000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "INFY": {
+    "next_result": {
+      "date": "2027-01-13",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/INFY.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 5145000000.0,
+        "net_profit": 817000000.0,
+        "eps": 0.2,
+        "revenue_qoq_pct": 1.24,
+        "revenue_yoy_pct": 1.36,
+        "net_profit_qoq_pct": -0.24,
+        "net_profit_yoy_pct": -2.62,
+        "eps_qoq_pct": 0.0,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 5082000000.0,
+        "net_profit": 819000000.0,
+        "eps": 0.2,
+        "revenue_qoq_pct": 0.83,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -10.88,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": -13.04,
+        "eps_yoy_pct": 5.26
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 5040000000.0,
+        "net_profit": 919000000.0,
+        "eps": 0.23,
+        "revenue_qoq_pct": -1.16,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 23.03,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 27.78,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 5099000000.0,
+        "net_profit": 747000000.0,
+        "eps": 0.18,
+        "revenue_qoq_pct": 0.45,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -10.97,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 5076000000.0,
+        "net_profit": 839000000.0,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": null,
+        "net_profit": null,
+        "eps": 0.19,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:25+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/INFY.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/INFY.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=INFY",
+      "screener": "https://www.screener.in/company/INFY/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "eps": 0.8,
+        "revenue": 20158000000.0,
+        "net_profit": 3313000000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "eps": 0.76,
+        "revenue": 19277000000.0,
+        "net_profit": 3158000000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "eps": 0.76,
+        "revenue": 18562000000.0,
+        "net_profit": 3167000000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "eps": 0.71,
+        "revenue": 18212000000.0,
+        "net_profit": 2981000000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "ICICIBANK": {
+    "next_result": {
+      "date": "2027-01-14",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/ICICIBANK.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 401531700000.0,
+        "net_profit": 163331800000.0,
+        "eps": 22.49,
+        "revenue_qoq_pct": 4.66,
+        "revenue_yoy_pct": 16.03,
+        "net_profit_qoq_pct": 5.78,
+        "net_profit_yoy_pct": 22.28,
+        "eps_qoq_pct": 5.64,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 383657400000.0,
+        "net_profit": 154400600000.0,
+        "eps": 21.29,
+        "revenue_qoq_pct": 7.34,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 4.64,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 4.57,
+        "eps_yoy_pct": 13.79
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 357423400000.0,
+        "net_profit": 147550600000.0,
+        "eps": 20.36,
+        "revenue_qoq_pct": 1.27,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 17.68,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 17.76,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 352926000000.0,
+        "net_profit": 125379800000.0,
+        "eps": 17.29,
+        "revenue_qoq_pct": 1.99,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -6.13,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 346048700000.0,
+        "net_profit": 133570600000.0,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": null,
+        "net_profit": null,
+        "eps": 18.71,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:28+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/ICICIBANK.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/ICICIBANK.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=ICICIBANK",
+      "screener": "https://www.screener.in/company/ICICIBANK/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 2234071181000.0,
+        "eps": 74.77,
+        "net_profit": 542077028000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 2047152637000.0,
+        "eps": 71.14,
+        "net_profit": 510291955000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 1612101952000.0,
+        "eps": 61.96,
+        "net_profit": 442563735000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 1355811552000.0,
+        "eps": 47.84,
+        "net_profit": 340366408000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "SBIN": {
+    "next_result": {
+      "date": "2027-02-04",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/SBIN.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 705974800000.0,
+        "net_profit": 253611600000.0,
+        "eps": 27.47,
+        "revenue_qoq_pct": -1.75,
+        "revenue_yoy_pct": 4.6,
+        "net_profit_qoq_pct": 5.18,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 5.17,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 718551100000.0,
+        "net_profit": 241130000000.0,
+        "eps": 26.12,
+        "revenue_qoq_pct": 5.73,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 22.76,
+        "net_profit_yoy_pct": 13.73,
+        "eps_qoq_pct": 22.74,
+        "eps_yoy_pct": 9.93
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 679578600000.0,
+        "net_profit": 196428700000.0,
+        "eps": 21.28,
+        "revenue_qoq_pct": -4.89,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -7.85,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": -7.84,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 714499700000.0,
+        "net_profit": 213171100000.0,
+        "eps": 23.09,
+        "revenue_qoq_pct": 5.86,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 674941400000.0,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": null,
+        "net_profit": 212014700000.0,
+        "eps": 23.76,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:31+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/SBIN.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/SBIN.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=SBIN",
+      "screener": "https://www.screener.in/company/SBIN/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "eps": 91.16,
+        "net_profit": 832987824000.0,
+        "revenue": 2602451277000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "eps": 86.91,
+        "net_profit": 775613371000.0,
+        "revenue": 2458691264000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "eps": 75.17,
+        "net_profit": 670846661000.0,
+        "revenue": 2269138245000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "eps": 62.35,
+        "net_profit": 556481728000.0,
+        "revenue": 1921097254000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "BHARTIARTL": {
+    "next_result": {
+      "date": "2027-02-03",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/BHARTIARTL.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 608775000000.0,
+        "net_profit": 88875000000.0,
+        "eps": 14.24,
+        "revenue_qoq_pct": 3.99,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 8.82,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 6.51,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 585391000000.0,
+        "net_profit": 81674000000.0,
+        "eps": 13.37,
+        "revenue_qoq_pct": 5.7,
+        "revenue_yoy_pct": 18.35,
+        "net_profit_qoq_pct": 11.5,
+        "net_profit_yoy_pct": 37.32,
+        "eps_qoq_pct": 10.04,
+        "eps_yoy_pct": 35.05
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 553832000000.0,
+        "net_profit": 73251000000.0,
+        "eps": 12.15,
+        "revenue_qoq_pct": 2.6,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 10.48,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 10.25,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 539816000000.0,
+        "net_profit": 66305000000.0,
+        "eps": 11.02,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 494626000000.0,
+        "net_profit": 59479000000.0,
+        "eps": 9.9,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:34+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/BHARTIARTL.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/BHARTIARTL.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=BHARTIARTL",
+      "screener": "https://www.screener.in/company/BHARTIARTL/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "net_profit": 266952000000.0,
+        "eps": 44.37,
+        "revenue": 2109728000000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "net_profit": 335561000000.0,
+        "eps": 56.04,
+        "revenue": 1729852000000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "net_profit": 74670000000.0,
+        "eps": 12.8,
+        "revenue": 1499824000000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "net_profit": 83459000000.0,
+        "eps": 14.57,
+        "revenue": 1391448000000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "LT": {
+    "next_result": {
+      "date": "2027-01-28",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/LT.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 787499400000.0,
+        "net_profit": 52021000000.0,
+        "eps": 37.8,
+        "revenue_qoq_pct": 15.91,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 26.18,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 26.17,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 679417400000.0,
+        "net_profit": 41228500000.0,
+        "eps": 29.96,
+        "revenue_qoq_pct": -17.91,
+        "revenue_yoy_pct": 6.69,
+        "net_profit_qoq_pct": -22.58,
+        "net_profit_yoy_pct": 13.98,
+        "eps_qoq_pct": -22.58,
+        "eps_yoy_pct": 13.96
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 827621600000.0,
+        "net_profit": 53256000000.0,
+        "eps": 38.7,
+        "revenue_qoq_pct": 15.83,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 65.64,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 65.67,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 714497000000.0,
+        "net_profit": 32151100000.0,
+        "eps": 23.36,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 636789200000.0,
+        "net_profit": 36171900000.0,
+        "eps": 26.29,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:36+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/LT.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/LT.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=LT",
+      "screener": "https://www.screener.in/company/LT/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "eps": 116.88,
+        "revenue": 2842251900000.0,
+        "net_profit": 160839900000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "eps": 109.28,
+        "revenue": 2542086500000.0,
+        "net_profit": 150371100000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "eps": 93.88,
+        "revenue": 2191156900000.0,
+        "net_profit": 130591100000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "eps": 74.45,
+        "revenue": 1816614200000.0,
+        "net_profit": 104707200000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "ITC": {
+    "next_result": {
+      "date": "2027-01-28",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/ITC.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 201212400000.0,
+        "net_profit": 41684000000.0,
+        "eps": 3.32,
+        "revenue_qoq_pct": 5.9,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -5.14,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": -5.41,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 190008900000.0,
+        "net_profit": 43941300000.0,
+        "eps": 3.51,
+        "revenue_qoq_pct": 7.78,
+        "revenue_yoy_pct": -11.1,
+        "net_profit_qoq_pct": -18.45,
+        "net_profit_yoy_pct": -16.21,
+        "eps_qoq_pct": -18.37,
+        "eps_yoy_pct": -16.03
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 176288900000.0,
+        "net_profit": 53879700000.0,
+        "eps": 4.3,
+        "revenue_qoq_pct": -11.49,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 9.26,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 9.14,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 199182400000.0,
+        "net_profit": 49311900000.0,
+        "eps": 3.94,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 213729300000.0,
+        "net_profit": 52442000000.0,
+        "eps": 4.18,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:39+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/ITC.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/ITC.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=ITC",
+      "screener": "https://www.screener.in/company/ITC/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 782132800000.0,
+        "net_profit": 206894700000.0,
+        "eps": 16.51
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 746533200000.0,
+        "net_profit": 347466300000.0,
+        "eps": 27.75
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 673910400000.0,
+        "net_profit": 204587800000.0,
+        "eps": 16.38
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 702452200000.0,
+        "net_profit": 191916600000.0,
+        "eps": 15.46
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "HINDUNILVR": {
+    "next_result": {
+      "date": "2027-02-18",
+      "period": "Q3 FY27",
+      "source_url": "https://finance.yahoo.com/quote/HINDUNILVR.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 180710000000.0,
+        "net_profit": 27900000000.0,
+        "eps": 11.87,
+        "revenue_qoq_pct": 5.16,
+        "revenue_yoy_pct": 14.79,
+        "net_profit_qoq_pct": 4.38,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 4.31,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 171840000000.0,
+        "net_profit": 26730000000.0,
+        "eps": 11.38,
+        "revenue_qoq_pct": 6.03,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -10.66,
+        "net_profit_yoy_pct": -3.01,
+        "eps_qoq_pct": -10.53,
+        "eps_yoy_pct": -2.98
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 162070000000.0,
+        "net_profit": 29920000000.0,
+        "eps": 12.72,
+        "revenue_qoq_pct": -0.17,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": -54.71,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": -54.77,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 162350000000.0,
+        "net_profit": 66070000000.0,
+        "eps": 28.12,
+        "revenue_qoq_pct": 3.13,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 157420000000.0,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": null,
+        "net_profit": 27560000000.0,
+        "eps": 11.73,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:15:42+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/HINDUNILVR.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/HINDUNILVR.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=HINDUNILVR",
+      "screener": "https://www.screener.in/company/HINDUNILVR/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 637630000000.0,
+        "eps": 64.0,
+        "net_profit": 150400000000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 605730000000.0,
+        "eps": 45.32,
+        "net_profit": 106490000000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 609660000000.0,
+        "eps": 43.74,
+        "net_profit": 102770000000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 595490000000.0,
+        "eps": 43.07,
+        "net_profit": 101200000000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
+  },
+  "AFFLE": {
+    "next_result": {
+      "date": null,
+      "period": null,
+      "source_url": "https://finance.yahoo.com/quote/AFFLE.NS/"
+    },
+    "quarters": [
+      {
+        "period_end": "2026-09-30",
+        "period": "Q2 FY27",
+        "revenue": 7835930000.0,
+        "net_profit": 1297990000.0,
+        "eps": 9.08,
+        "revenue_qoq_pct": 4.88,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 1.06,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 0.67,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2026-06-30",
+        "period": "Q1 FY27",
+        "revenue": 7471640000.0,
+        "net_profit": 1284390000.0,
+        "eps": 9.02,
+        "revenue_qoq_pct": 3.15,
+        "revenue_yoy_pct": 20.37,
+        "net_profit_qoq_pct": 7.47,
+        "net_profit_yoy_pct": 21.74,
+        "eps_qoq_pct": 6.24,
+        "eps_yoy_pct": 20.27
+      },
+      {
+        "period_end": "2026-03-31",
+        "period": "Q4 FY26",
+        "revenue": 7243770000.0,
+        "net_profit": 1195140000.0,
+        "eps": 8.49,
+        "revenue_qoq_pct": 0.96,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": 0.16,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": 0.0,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-12-31",
+        "period": "Q3 FY26",
+        "revenue": 7174740000.0,
+        "net_profit": 1193240000.0,
+        "eps": 8.49,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-06-30",
+        "period": "Q1 FY26",
+        "revenue": 6207400000.0,
+        "net_profit": 1055000000.0,
+        "eps": 7.5,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "Q4 FY25",
+        "revenue": null,
+        "net_profit": null,
+        "eps": null,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
+      }
+    ],
+    "updated_at": "2026-11-15T15:18:59+05:30",
+    "stale": false,
+    "source_url": "https://finance.yahoo.com/quote/AFFLE.NS/",
+    "links": {
+      "yahoo": "https://finance.yahoo.com/quote/AFFLE.NS/",
+      "nse": "https://www.nseindia.com/get-quotes/equity?symbol=AFFLE",
+      "screener": "https://www.screener.in/company/AFFLE/consolidated/"
+    },
+    "unit": "as reported by Yahoo Finance for the .NS ticker; not converted",
+    "annual": [
+      {
+        "period_end": "2026-03-31",
+        "period": "FY26",
+        "revenue": 27086100000.0,
+        "eps": 32.32,
+        "net_profit": 4548510000.0
+      },
+      {
+        "period_end": "2025-03-31",
+        "period": "FY25",
+        "revenue": 22654990000.0,
+        "eps": 27.19,
+        "net_profit": 3818690000.0
+      },
+      {
+        "period_end": "2024-03-31",
+        "period": "FY24",
+        "revenue": 18420780000.0,
+        "eps": 21.91,
+        "net_profit": 2972690000.0
+      },
+      {
+        "period_end": "2023-03-31",
+        "period": "FY23",
+        "revenue": 14334440000.0,
+        "eps": 18.363916,
+        "net_profit": 2445890000.0
+      }
+    ],
+    "annual_count": 4,
+    "annual_source": "yahoo_fundamentals_timeseries"
   }
 }

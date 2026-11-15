@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS app_meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS summary_cache (
+    url TEXT PRIMARY KEY,
+    summary TEXT NOT NULL,
+    sentiment TEXT NOT NULL
+);
 """
 
 
@@ -68,6 +73,33 @@ class HistoryStore:
     def clear(self):
         with self._lock, self._connect() as conn:
             conn.execute("DELETE FROM search_history")
+
+    def get_summary(self, url):
+        if not url:
+            return None
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT summary, sentiment FROM summary_cache WHERE url = ?",
+                (url,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {"summary": row["summary"], "sentiment": row["sentiment"]}
+
+    def put_summary(self, url, summary, sentiment):
+        if not url or not summary or not sentiment:
+            return
+        with self._lock, self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO summary_cache (url, summary, sentiment)
+                VALUES (?, ?, ?)
+                ON CONFLICT(url) DO UPDATE SET
+                    summary = excluded.summary,
+                    sentiment = excluded.sentiment
+                """,
+                (url, summary, sentiment),
+            )
 
     def delete_stock(self, stock):
         with self._lock, self._connect() as conn:

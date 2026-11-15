@@ -65,6 +65,10 @@ sources:
     enabled: true
     priority: 1
     timeout: 6
+  - name: bing_news_rss
+    enabled: true
+    priority: 2
+    timeout: 8
   - name: yahoo_finance
     enabled: true
     priority: 10

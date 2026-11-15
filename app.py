@@ -1,15 +1,21 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+import json
+import logging
+import os
+import threading
+import time
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import schedule
+from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask_cors import CORS
+
+import results_board
 from config_loader import load_config
 from history_store import HistoryStore
 from logutil import configure_logging, log_event
 from news_fetcher import NewsFetcher
-import logging
-import schedule
-import time
-import threading
-import os
-from flask_cors import CORS
-import json
+from summaries import apply_summaries
 
 try:
     from dotenv import load_dotenv
@@ -57,17 +63,27 @@ def _cache_entry(stock):
     fresh = time.time() - fetched_at < NEWS_CACHE_TTL_SECONDS
     return articles, fresh
 
+def real_articles(articles):
+    """Drop the old 'no news' placeholder so it is not counted as a story."""
+    if not isinstance(articles, list):
+        return []
+    return [
+        item for item in articles
+        if isinstance(item, dict) and item.get("type") != "info" and item.get("title")
+    ]
+
 def cache_get(stock):
     """Return cached articles, or None when missing or older than the TTL."""
     articles, fresh = _cache_entry(stock)
-    if not fresh:
+    kept = real_articles(articles)
+    if not fresh or not kept:
         return None
-    return articles
+    return kept
 
 def cache_peek(stock):
-    """Return the last articles even when the TTL has passed."""
+    """Return the last real articles even when the TTL has passed."""
     articles, _fresh = _cache_entry(stock)
-    return articles
+    return real_articles(articles)
 
 # SQLite replaces search_history.json. HISTORY_FILE is only the one-time import.
 HISTORY_DB = os.environ.get("HISTORY_DB", "search_history.db")
@@ -96,6 +112,16 @@ scheduler_thread.start()
 
 def load_history():
     return history_store.load()
+
+def attach_summaries(news, query):
+    """Optional. Missing key or API failure must not change the headline list."""
+    if not isinstance(news, list):
+        return news
+    try:
+        return apply_summaries(news, query, history_store)
+    except Exception as exc:
+        log_event(logging.WARNING, "summary", outcome="error", error=exc.__class__.__name__)
+        return news
 
 SYMBOLS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'symbols.json')
 
@@ -162,9 +188,58 @@ def match_symbols(query, limit=12):
                 return results
     return results
 
+def _quiet_source(source):
+    text = str(source or "").strip()
+    if not text or text.lower() in {"bing news", "bing", "unknown source"}:
+        return "Bing"
+    return text
+
+def _short_ago(value):
+    if not value:
+        return ""
+    try:
+        moment = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    minutes = int((datetime.now(timezone.utc) - moment.astimezone(timezone.utc)).total_seconds() // 60)
+    if minutes < 1:
+        return "just now"
+    if minutes < 60:
+        return f"{minutes}m ago"
+    hours = minutes // 60
+    if hours < 24:
+        return f"{hours}h ago"
+    days = hours // 24
+    if days < 7:
+        return f"{days}d ago"
+    return moment.strftime("%d %b")
+
+def _circulating_cards():
+    sections, stale = news_fetcher.markets_snapshot()
+    cards = []
+    for section in sections:
+        item = (section.get("news") or [None])[0] or {}
+        cards.append({
+            "id": section["id"],
+            "title": section["title"],
+            "headline": item.get("title") or "",
+            "url": item.get("url") or "",
+            "source": _quiet_source(item.get("source")) if item.get("title") else "",
+            "when": _short_ago(item.get("published_at")),
+        })
+    return cards, stale
+
 @app.route('/')
 def home():
-    return render_template('index.html', indices=APP_CONFIG.indices)
+    circulating, circulating_stale = _circulating_cards()
+    return render_template(
+        'index.html',
+        indices=APP_CONFIG.indices,
+        circulating=circulating,
+        circulating_stale=circulating_stale,
+    )
 
 @app.route('/favicon.ico')
 def favicon():
@@ -207,17 +282,18 @@ def search():
                     news = list(news) if news else []
                 except TypeError:
                     news = []
-            news = [item for item in news if isinstance(item, dict)]
+            news = real_articles(news)
             if stale:
                 previous = cache_peek(stock)
                 if previous and not news:
                     news = previous
-            else:
+            elif news:
                 cache_put(stock, news)
 
         if served_cached:
-            news = [item for item in news if isinstance(item, dict)]
-        
+            news = real_articles(news)
+
+        news = attach_summaries(news, stock)
         history_store.append(stock, len(news))
         history = load_history()
         
@@ -234,6 +310,7 @@ def search():
             previous = cache_peek(stock) or []
         except Exception:
             previous = []
+        previous = real_articles(previous)
         if previous:
             return jsonify({
                 'news': previous,
@@ -287,7 +364,7 @@ def watchlist_news():
             "name": row["name"],
             "ticker": row["ticker"],
             "aliases": row["aliases"],
-            "news": list(news)[:8],
+            "news": real_articles(list(news))[:8],
             "stale": bool(getattr(news, "stale", False)),
         })
     return jsonify({"items": items})
@@ -318,6 +395,144 @@ def check_cache_status(stock):
         "hasCache": cache_get(stock) is not None
     })
 
+@app.route('/api/markets-now', methods=['GET'])
+def markets_now():
+    """Five topics from data/markets_now.json. Bing runs only when that file is stale or missing."""
+    try:
+        sections, stale, cached = news_fetcher.fetch_trending()
+    except Exception as exc:
+        log_event(logging.WARNING, "markets_now", outcome="error", error=exc.__class__.__name__)
+        sections, stale, cached = [], True, False
+    return jsonify({"sections": sections, "stale": stale, "cached": cached})
+
+def _iso_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value)[:10]).date()
+    except ValueError:
+        return None
+
+def _when_label(date_text):
+    day = _iso_date(date_text)
+    if day is None:
+        return "date unknown"
+    delta = (day - datetime.now().date()).days
+    if delta < 0:
+        return "date passed"
+    if delta == 0:
+        return "today"
+    if delta == 1:
+        return "in 1 day"
+    return f"in {delta} days"
+
+def _load_results():
+    """Read data/results.json. The request never calls a market-data library."""
+    root = Path(app.root_path)
+    results_path = root / "data" / "results.json"
+    watch_path = root / "data" / "watchlist.json"
+    if not results_path.is_file():
+        return {"missing": True, "items": [], "updated_at": None, "stale": False}
+    try:
+        payload = json.loads(results_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        log_event(logging.WARNING, "results", outcome="unreadable")
+        return {"missing": True, "items": [], "updated_at": None, "stale": False}
+    names = {}
+    if watch_path.is_file():
+        try:
+            rows = json.loads(watch_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            rows = []
+        if isinstance(rows, list):
+            for row in rows:
+                if isinstance(row, dict) and row.get("symbol"):
+                    names[str(row["symbol"]).upper()] = row.get("name") or row["symbol"]
+    if not isinstance(payload, dict):
+        return {"missing": True, "items": [], "updated_at": None, "stale": False}
+    cutoff = datetime.now().astimezone() - timedelta(days=3)
+    items = []
+    newest = None
+    section_stale = False
+    for symbol, block in payload.items():
+        if not isinstance(block, dict):
+            continue
+        symbol = str(symbol).upper()
+        nxt = block.get("next_result") if isinstance(block.get("next_result"), dict) else {}
+        quarters = block.get("quarters") if isinstance(block.get("quarters"), list) else []
+        latest = quarters[0] if quarters and isinstance(quarters[0], dict) else {}
+        links = block.get("links") if isinstance(block.get("links"), dict) else {}
+        source_url = (
+            nxt.get("source_url")
+            or block.get("source_url")
+            or links.get("screener")
+            or f"https://www.screener.in/company/{symbol}/consolidated/"
+        )
+        updated = block.get("updated_at")
+        record_stale = bool(block.get("stale"))
+        parsed_updated = None
+        if updated:
+            try:
+                parsed_updated = datetime.fromisoformat(str(updated))
+            except ValueError:
+                parsed_updated = None
+        if parsed_updated is not None:
+            aware = parsed_updated if parsed_updated.tzinfo else parsed_updated.astimezone()
+            if aware < cutoff:
+                record_stale = True
+            if newest is None or aware > newest:
+                newest = aware
+        if record_stale:
+            section_stale = True
+        items.append({
+            "symbol": symbol,
+            "name": names.get(symbol, symbol),
+            "next_date": nxt.get("date"),
+            "next_period": nxt.get("period"),
+            "when": _when_label(nxt.get("date")),
+            "latest_period": latest.get("period"),
+            "revenue": latest.get("revenue"),
+            "net_profit": latest.get("net_profit"),
+            "eps": latest.get("eps"),
+            "updated_at": updated,
+            "stale": record_stale,
+            "source_url": source_url,
+        })
+    return {
+        "missing": False,
+        "items": items,
+        "updated_at": newest.isoformat() if newest else None,
+        "stale": section_stale,
+    }
+
+@app.route('/results')
+def results_page():
+    return render_template('results.html')
+
+@app.route('/api/results/board', methods=['GET'])
+def results_board_list():
+    return jsonify({"items": results_board.list_board()})
+
+@app.route('/api/results/board', methods=['POST'])
+def results_board_add():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        item = results_board.add_symbol(payload.get("symbol"), payload.get("name"))
+    except ValueError:
+        return jsonify({"error": "Enter an NSE symbol such as KPIGREEN."}), 400
+    return jsonify(item)
+
+@app.route('/api/results/board/<symbol>', methods=['DELETE'])
+def results_board_remove(symbol):
+    try:
+        return jsonify(results_board.remove_symbol(symbol))
+    except ValueError:
+        return jsonify({"error": "Unknown symbol."}), 400
+
+@app.route('/api/results', methods=['GET'])
+def results_feed():
+    return jsonify(_load_results())
+
 @app.route('/api/news', methods=['GET'])
 def get_news():
     stock = request.args.get('stock', '')
@@ -327,14 +542,14 @@ def get_news():
         if index in configured_ids or index in {'NIFTY50', 'DOWJONES'}:
             news = news_fetcher.fetch_index_news(index)
             return jsonify({
-                'news': list(news),
+                'news': attach_summaries(real_articles(list(news)), index),
                 'stale': bool(getattr(news, 'stale', False)),
             })
         return jsonify({'error': 'Stock parameter is required'}), 400
 
     news = news_fetcher.fetch_news(stock)
     return jsonify({
-        'news': list(news),
+        'news': attach_summaries(real_articles(list(news)), stock),
         'stale': bool(getattr(news, 'stale', False)),
     })
 
@@ -348,6 +563,6 @@ if __name__ == '__main__':
     app.run(
         debug=debug_from_env(),
         host='0.0.0.0',
-        port=int(os.environ.get('PORT', 5000)),
+        port=int(os.environ.get("PORT", "5000")),
         exclude_patterns=['*search_history.json'],
     ) 

@@ -7,18 +7,45 @@ live sources failed. Cache entries stay `{"data", "fetched_at"}`.
 
 from __future__ import annotations
 
+import json
 import logging
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import quote_plus
+from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 
 from logutil import log_event
-from sources.base import SourceError, utc_now_iso
+from sources.base import SourceError
 from sources.dedupe import dedupe_articles
 from sources.registry import build_sources
+from sources.rss import articles_from_feed
+
+# One short Bing query each. They run together; the page does not wait on HTML scrapers.
+TRENDING_TOPICS = (
+    {"id": "markets", "title": "Markets", "query": "India Sensex Nifty stock market"},
+    {"id": "companies", "title": "Companies", "query": "Reliance TCS Infosys HDFC Bank shares"},
+    {"id": "policy", "title": "Policy", "query": "RBI policy India budget SEBI regulation"},
+    {"id": "global", "title": "Global", "query": "Wall Street crude oil global cues India"},
+    {"id": "earnings", "title": "Earnings", "query": "India quarterly results earnings guidance"},
+)
 
 NIFTY_NAMES = {"NIFTY50", "NIFTY", "NIFTY 50"}
 DOW_NAMES = {"DOWJONES", "DOW JONES", "DOW"}
+
+
+def _direct_href(url):
+    """Prefer the publisher URL inside a Bing click redirect. Other http(s) links pass through."""
+    text = str(url or "").strip()
+    if not text.startswith(("http://", "https://")):
+        return ""
+    parsed = urlparse(text)
+    host = parsed.netloc.lower()
+    if host.endswith("bing.com") and "apiclick" in parsed.path:
+        raw = unquote(parse_qs(parsed.query).get("url", [""])[0]).strip()
+        if raw.startswith(("http://", "https://")):
+            return raw
+    return text
 
 
 class NewsList(list):
@@ -56,6 +83,9 @@ class NewsFetcher:
         self.extra_aliases = {}
         self.news_cache = {}
         self.cache_expiry = 300
+        self._markets_path = Path(__file__).resolve().parent / "data" / "markets_now.json"
+        self._markets_lock = threading.Lock()
+        self._markets_thread = None
 
     def set_cache_ttl(self, seconds):
         try:
@@ -112,6 +142,149 @@ class NewsFetcher:
             queries = [index_name]
             scope = "stock"
         return self._fetch(index_name, queries, scope, [index_name], force=force, index=True)
+
+    def markets_snapshot(self):
+        """Saved strip for the homepage. Does not call Bing. A stale or missing file refreshes in the background."""
+        payload = self._read_markets()
+        fresh = bool(payload) and self._markets_fresh(payload)
+        if not fresh:
+            self._ensure_refresh(wait=False)
+        sections = self._normalize(payload.get("sections") if payload else None)
+        return sections, bool(payload) and not fresh
+
+    def fetch_trending(self, force=False):
+        """Five topics. A fresh file returns at once. A stale file returns at once and refreshes behind it.
+
+        A missing file waits for one Bing pass. Returns (sections, stale, cached).
+        """
+        payload = None if force else self._read_markets()
+        if payload and self._markets_fresh(payload):
+            log_event(logging.INFO, "news_cache", symbol="TRENDING", outcome="hit")
+            return self._normalize(payload.get("sections")), False, True
+        if payload and not force:
+            self._ensure_refresh(wait=False)
+            log_event(logging.WARNING, "news_fetch", symbol="TRENDING", outcome="stale")
+            return self._normalize(payload.get("sections")), True, True
+        self._ensure_refresh(wait=True)
+        payload = self._read_markets()
+        sections = self._normalize(payload.get("sections") if payload else None)
+        return sections, False, False
+
+    def _ensure_refresh(self, wait):
+        with self._markets_lock:
+            thread = self._markets_thread
+            if thread is None or not thread.is_alive():
+                thread = threading.Thread(target=self._refresh_job, name="markets-now", daemon=True)
+                self._markets_thread = thread
+                thread.start()
+        if wait:
+            thread.join(timeout=12)
+
+    def _refresh_job(self):
+        previous = self._read_markets()
+        loaded = self._load_trending()
+        merged = self._merge_topics(previous, loaded)
+        if any(section.get("news") for section in merged):
+            self._write_markets(merged)
+
+    def _load_trending(self):
+        bing = next((source for source in self.sources if source.name == "bing_news_rss" and source.enabled), None)
+        if bing is None:
+            return self._normalize(None)
+        bing.http.allowed(bing.build_url(TRENDING_TOPICS[0]["query"]))
+        with ThreadPoolExecutor(max_workers=len(TRENDING_TOPICS)) as pool:
+            futures = [pool.submit(self._trending_topic, bing, topic) for topic in TRENDING_TOPICS]
+            return [future.result() for future in futures]
+
+    def _trending_topic(self, bing, topic):
+        news = []
+        try:
+            response = bing.http.get(
+                bing.build_url(topic["query"]), timeout=3, attempts=1, pace=False
+            )
+            articles = articles_from_feed(
+                response.text, topic["query"], limit=4, default_source="Bing News"
+            )
+        except Exception as exc:
+            log_event(
+                logging.WARNING,
+                "source_fetch",
+                source="bing_news_rss",
+                outcome="error",
+                error=exc.__class__.__name__,
+                topic=topic["id"],
+            )
+            articles = []
+        for article in articles:
+            href = _direct_href(article.url)
+            if not article.title or not href:
+                continue
+            payload = article.as_dict()
+            payload["url"] = href
+            news.append(payload)
+            break
+        return {"id": topic["id"], "title": topic["title"], "news": news}
+
+    def _normalize(self, sections):
+        by_id = {}
+        for section in sections or []:
+            if isinstance(section, dict) and section.get("id"):
+                by_id[section["id"]] = section
+        normalized = []
+        for topic in TRENDING_TOPICS:
+            current = by_id.get(topic["id"]) or {}
+            news = []
+            for item in current.get("news") or []:
+                if not isinstance(item, dict):
+                    continue
+                title = str(item.get("title") or "").strip()
+                url = _direct_href(item.get("url"))
+                if not title or not url:
+                    continue
+                news.append({
+                    "title": title,
+                    "url": url,
+                    "source": str(item.get("source") or "").strip(),
+                    "published_at": str(item.get("published_at") or ""),
+                    "type": item.get("type") or "rss",
+                })
+                break
+            normalized.append({"id": topic["id"], "title": topic["title"], "news": news})
+        return normalized
+
+    def _merge_topics(self, previous, loaded):
+        prior = self._normalize(previous.get("sections") if isinstance(previous, dict) else None)
+        fresh = self._normalize(loaded)
+        merged = []
+        for old, new in zip(prior, fresh):
+            merged.append({
+                "id": new["id"],
+                "title": new["title"],
+                "news": new["news"] or old["news"],
+            })
+        return merged
+
+    def _markets_fresh(self, payload):
+        fetched_at = payload.get("fetched_at") if isinstance(payload, dict) else None
+        if not isinstance(fetched_at, (int, float)):
+            return False
+        return time.time() - fetched_at < self.cache_expiry
+
+    def _read_markets(self):
+        try:
+            payload = json.loads(self._markets_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+        if not isinstance(payload, dict) or not isinstance(payload.get("sections"), list):
+            return None
+        return payload
+
+    def _write_markets(self, sections):
+        payload = {"fetched_at": time.time(), "sections": self._normalize(sections)}
+        self._markets_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self._markets_path.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        temporary.replace(self._markets_path)
 
     def _search_queries(self, stock):
         terms = [stock]
@@ -268,25 +441,8 @@ class NewsFetcher:
                 count=len(previous),
             )
             return NewsList(previous, stale=True, failed_sources=failed)
-        placeholder = {
-            "title": f"No recent news found for {key}",
-            "description": "Try another search term or check back later for updates.",
-            "summary": "Try another search term or check back later for updates.",
-            "url": "https://www.google.com/search?q=" + quote_plus(f"{key} stock news"),
-            "source": "Info",
-            "published_at": utc_now_iso(),
-            "symbols": list(symbols),
-            "type": "info",
-        }
-        if key == "NIFTY50":
-            placeholder["description"] = "Try again later for market updates."
-            placeholder["summary"] = placeholder["description"]
-        elif key == "DOWJONES":
-            placeholder["description"] = "Try again later for market updates."
-            placeholder["summary"] = placeholder["description"]
-        self._cache_put(key, [placeholder])
         log_event(logging.INFO, "news_fetch", symbol=key, outcome="empty", failed_sources=failed)
-        return NewsList([placeholder], stale=False, failed_sources=failed)
+        return NewsList([], stale=False, failed_sources=failed)
 
     def _cache_put(self, key, articles):
         self.news_cache[key] = {"data": articles, "fetched_at": time.time()}
@@ -300,6 +456,8 @@ class NewsFetcher:
         if not isinstance(fetched_at, (int, float)) or not isinstance(data, list):
             return None
         if time.time() - fetched_at >= self.cache_expiry:
+            return None
+        if data and all(isinstance(item, dict) and item.get("type") == "info" for item in data):
             return None
         return data
 

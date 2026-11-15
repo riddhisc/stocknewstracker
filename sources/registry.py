@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from sources.http import HttpClient
 from sources.newsapi import NewsApiSource
-from sources.rss import GoogleNewsRssSource
+from sources.rss import BingNewsRssSource, GoogleNewsRssSource
 from sources.scrapers import (
     CnbcSource,
     EconomicTimesNiftySource,
@@ -20,6 +20,7 @@ from sources.scrapers import (
 
 SOURCE_CLASSES = [
     GoogleNewsRssSource,
+    BingNewsRssSource,
     YahooFinanceSource,
     EconomicTimesSource,
     EconomicTimesNiftySource,
