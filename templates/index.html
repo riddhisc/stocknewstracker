@@ -570,6 +570,50 @@
             outline-offset: 2px;
         }
 
+        .mast-actions {
+            display: flex;
+            gap: 8px;
+            flex: none;
+        }
+
+        .status-panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 16px 8px;
+            margin-top: 18px;
+        }
+
+        .status-panel[hidden] { display: none; }
+
+        .status-overall {
+            font-family: Georgia, "Palatino Linotype", Palatino, serif;
+            font-size: 1.35rem;
+            margin: 4px 0 10px;
+            text-transform: capitalize;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-top: 1px solid var(--line);
+            font-size: 0.92rem;
+        }
+
+        .status-name { font-weight: 650; }
+
+        .status-meta {
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .status-ok { color: #2f6b45; }
+        .status-degraded { color: var(--amber-deep); }
+        .status-down { color: var(--danger); }
+        .status-off { color: var(--muted); }
+
         @media (max-width: 680px) {
             .brand h1 { font-size: 1.2rem; }
             .ghost-btn span { display: none; }
@@ -593,10 +637,16 @@
                         <h1>Indian Stock News Tracker</h1>
                     </div>
                 </div>
-                <button type="button" id="historyBtn" class="ghost-btn" title="View search history">
-                    <i class="fas fa-history"></i>
-                    <span>History</span>
-                </button>
+                <div class="mast-actions">
+                    <button type="button" id="statusBtn" class="ghost-btn" title="System status" aria-expanded="false" aria-controls="statusPanel">
+                        <i class="fas fa-signal"></i>
+                        <span>Status</span>
+                    </button>
+                    <button type="button" id="historyBtn" class="ghost-btn" title="View search history">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </button>
+                </div>
             </div>
             <form id="searchForm" class="finder" role="search">
                 <label class="visually-hidden" for="stockInput">Stock or index</label>
@@ -617,6 +667,11 @@
     </header>
 
     <main class="sheet">
+        <section id="statusPanel" class="status-panel" hidden aria-live="polite">
+            <p class="eyebrow">System status</p>
+            <p id="statusOverall" class="status-overall">Checking…</p>
+            <div id="statusSources"></div>
+        </section>
         <div id="recentSearches" class="recent"></div>
 
         <div class="loading" style="display:none" aria-live="polite">
@@ -759,6 +814,62 @@
         function hideError() {
             document.querySelector('.error-message').style.display = 'none';
         }
+
+        function statusClass(status) {
+            if (status === 'ok' || status === 'degraded' || status === 'down' || status === 'off') {
+                return 'status-' + status;
+            }
+            return 'status-off';
+        }
+
+        function renderHealth(data) {
+            const overall = document.getElementById('statusOverall');
+            const list = document.getElementById('statusSources');
+            const label = data && data.status ? data.status : 'down';
+            overall.textContent = label;
+            overall.className = 'status-overall ' + statusClass(label);
+            const sources = data && Array.isArray(data.sources) ? data.sources : [];
+            if (!sources.length) {
+                list.innerHTML = '<p class="status-meta">No sources configured.</p>';
+                return;
+            }
+            list.innerHTML = sources.map((source) => {
+                const enabled = source.enabled !== false;
+                const state = enabled ? (source.status || 'down') : 'off';
+                const when = source.last_success ? formatWhen(source.last_success) : 'No successful fetch yet';
+                const problem = source.last_error ? esc(source.last_error) : '';
+                return `
+                    <div class="status-row">
+                        <div>
+                            <div class="status-name">${esc(source.name || 'source')}</div>
+                            <div class="status-meta">${esc(when)}</div>
+                        </div>
+                        <div class="status-meta">
+                            <div class="${statusClass(state)}">${esc(state)}</div>
+                            ${problem ? `<div>${problem}</div>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        document.getElementById('statusBtn').addEventListener('click', async () => {
+            const panel = document.getElementById('statusPanel');
+            const button = document.getElementById('statusBtn');
+            const willOpen = panel.hidden;
+            panel.hidden = !willOpen;
+            button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            if (!willOpen) return;
+            document.getElementById('statusOverall').textContent = 'Checking…';
+            document.getElementById('statusOverall').className = 'status-overall';
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                renderHealth(data);
+            } catch (error) {
+                renderHealth({status: 'down', sources: []});
+                document.getElementById('statusSources').innerHTML = `<p class="status-meta">${esc(error.message)}</p>`;
+            }
+        });
 
         document.getElementById('historyBtn').addEventListener('click', async () => {
             await loadHistory();

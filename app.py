@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from config_loader import load_config
+from logutil import configure_logging, log_event
 from news_fetcher import NewsFetcher
+import logging
 import schedule
 import time
 import threading
@@ -14,6 +16,8 @@ try:
     load_dotenv()
 except ImportError:
     pass
+
+configure_logging()
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -96,7 +100,7 @@ def load_history():
             data = json.load(f)
         return data if isinstance(data, list) else []
     except (json.JSONDecodeError, OSError) as exc:
-        print(f"Could not read search history: {exc}")
+        log_event(logging.WARNING, "history_read", outcome="error", error=exc.__class__.__name__)
         return []
 
 def save_history(history):
@@ -110,7 +114,7 @@ def load_symbols():
         with open(SYMBOLS_PATH, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"Could not read symbol list: {exc}")
+        log_event(logging.WARNING, "symbols_read", outcome="error", error=exc.__class__.__name__)
         return []
     symbols = []
     seen = set()
@@ -191,16 +195,24 @@ def search():
         news = None if force_refresh else cache_get(stock)
         if news is not None:
             served_cached = True
-            print(f"Using cached news for {stock}")
+            log_event(logging.INFO, "search", symbol=stock, outcome="cache")
         else:
-            if force_refresh:
-                print(f"{stock} search detected - forcing refresh of cache and fetching fresh news")
-            else:
-                print(f"{stock} search detected - fetching fresh news")
+            log_event(
+                logging.INFO,
+                "search",
+                symbol=stock,
+                outcome="refresh" if force_refresh else "fetch",
+            )
             news = news_fetcher.fetch_news(stock, force=force_refresh)
             stale = bool(getattr(news, "stale", False))
             if not isinstance(news, list):
-                print(f"Warning: News is not a list, converting. Type: {type(news)}")
+                log_event(
+                    logging.WARNING,
+                    "search",
+                    symbol=stock,
+                    outcome="coerce",
+                    error=type(news).__name__,
+                )
                 try:
                     news = list(news) if news else []
                 except TypeError:
@@ -234,7 +246,7 @@ def search():
             'stale': stale,
         })
     except Exception as e:
-        print(f"Error in search endpoint: {e.__class__.__name__}")
+        log_event(logging.ERROR, "search", outcome="error", error=e.__class__.__name__)
         previous = []
         try:
             previous = cache_peek(stock) or []
@@ -257,6 +269,27 @@ def search():
 @app.route('/api/suggest')
 def suggest_symbols():
     return jsonify(match_symbols(request.args.get('q', '')))
+
+@app.route('/health')
+def health():
+    """Process health plus one row per source. Disabled sources stay in the list."""
+    reports = []
+    enabled_statuses = []
+    for source in news_fetcher.sources:
+        report = source.health()
+        reports.append(report)
+        if report.get("enabled"):
+            enabled_statuses.append(report.get("status"))
+    if not enabled_statuses or set(enabled_statuses) <= {"ok"}:
+        overall = "ok"
+    elif set(enabled_statuses) == {"down"}:
+        overall = "down"
+    else:
+        overall = "degraded"
+    # 200 while the process can still serve cached headlines. 503 only when
+    # every enabled source is down.
+    code = 503 if overall == "down" else 200
+    return jsonify({"status": overall, "sources": reports}), code
 
 @app.route('/api/watchlist/news')
 def watchlist_news():
