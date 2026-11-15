@@ -1,6 +1,6 @@
 # Indian Stock News Tracker
 
-A web application that aggregates news for Indian stocks from multiple reliable sources without requiring any API keys.
+A web application that aggregates news for Indian stocks from public RSS feeds, with HTML pages as a fallback. NewsAPI is optional: search works when `NEWS_API_KEY` is empty. Set the key only if you enable the `newsapi` source.
 
 ## Features
 
@@ -15,7 +15,7 @@ A web application that aggregates news for Indian stocks from multiple reliable 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/stocknewstracker.git
+   git clone https://github.com/riddhisc/stocknewstracker.git
    cd stocknewstracker
    ```
 
@@ -76,7 +76,9 @@ A web application that aggregates news for Indian stocks from multiple reliable 
 ## Environment Variables
 
 - `PORT`: Port number for the application (default: 5000)
-- `HISTORY_FILE`: Path to store search history (default: search_history.json)
+- `HISTORY_FILE`: JSON search history path (default: search_history.json). This file is local and gitignored.
+- `NEWS_API_KEY`: Optional. Search does not require it.
+- See `.env.example` for `HISTORY_DB`, `LOG_LEVEL`, `CONFIG_PATH`, `ENABLE_SUMMARY`, and `ANTHROPIC_API_KEY`.
 
 ## License
 
