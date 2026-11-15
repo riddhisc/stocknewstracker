@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from config_loader import load_config
+from history_store import HistoryStore
 from logutil import configure_logging, log_event
 from news_fetcher import NewsFetcher
 import logging
@@ -9,7 +10,6 @@ import threading
 import os
 from flask_cors import CORS
 import json
-from datetime import datetime
 
 try:
     from dotenv import load_dotenv
@@ -69,8 +69,10 @@ def cache_peek(stock):
     articles, _fresh = _cache_entry(stock)
     return articles
 
-# File to store search history
-HISTORY_FILE = os.environ.get('HISTORY_FILE', 'search_history.json')
+# SQLite replaces search_history.json. HISTORY_FILE is only the one-time import.
+HISTORY_DB = os.environ.get("HISTORY_DB", "search_history.db")
+HISTORY_FILE = os.environ.get("HISTORY_FILE", "search_history.json")
+history_store = HistoryStore(HISTORY_DB, HISTORY_FILE)
 
 def update_news_cache():
     for stock in list(news_cache.keys()):
@@ -93,19 +95,7 @@ scheduler_thread.daemon = True
 scheduler_thread.start()
 
 def load_history():
-    if not os.path.exists(HISTORY_FILE):
-        return []
-    try:
-        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except (json.JSONDecodeError, OSError) as exc:
-        log_event(logging.WARNING, "history_read", outcome="error", error=exc.__class__.__name__)
-        return []
-
-def save_history(history):
-    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-        json.dump(history, f)
+    return history_store.load()
 
 SYMBOLS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'symbols.json')
 
@@ -228,16 +218,8 @@ def search():
         if served_cached:
             news = [item for item in news if isinstance(item, dict)]
         
-        # Update search history
+        history_store.append(stock, len(news))
         history = load_history()
-        history.append({
-            'stock': stock,
-            'timestamp': datetime.now().isoformat(),
-            'count': len(news)
-        })
-        # Keep only last 50 searches
-        history = history[-50:]
-        save_history(history)
         
         return jsonify({
             'news': news,
@@ -316,19 +298,12 @@ def get_history():
 
 @app.route('/api/history', methods=['DELETE'])
 def clear_history():
-    save_history([])
+    history_store.clear()
     return jsonify({"message": "History cleared"})
 
 @app.route('/api/history/<stock>', methods=['DELETE'])
 def delete_history_item(stock):
-    history = load_history()
-    
-    # Filter out entries for the specified stock
-    updated_history = [item for item in history if item['stock'].upper() != stock.upper()]
-    
-    # Save the updated history
-    save_history(updated_history)
-    
+    history_store.delete_stock(stock)
     return jsonify({"message": f"History for {stock} deleted"})
 
 @app.route('/api/cache-status/<stock>', methods=['GET'])

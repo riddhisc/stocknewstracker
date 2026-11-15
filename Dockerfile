@@ -8,6 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV PORT=8080
+# Persist search history on a local volume. No paid database.
+ENV HISTORY_DB=/data/search_history.db
+VOLUME ["/data"]
 
 EXPOSE 8080
 

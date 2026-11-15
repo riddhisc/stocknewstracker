@@ -5,7 +5,10 @@ from unittest.mock import patch
 
 _history = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
 _history.close()
+_db = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+_db.close()
 os.environ["HISTORY_FILE"] = _history.name
+os.environ["HISTORY_DB"] = _db.name
 
 import app
 

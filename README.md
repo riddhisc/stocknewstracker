@@ -68,8 +68,10 @@ A web application that aggregates news for Indian stocks from public RSS feeds, 
 1. Build the Docker container:
    ```
    docker build -t stocknewstracker .
-   docker run -p 8080:8080 stocknewstracker
+   docker run -p 8080:8080 -v stock-history:/data stocknewstracker
    ```
+
+Search history is SQLite at `/data/search_history.db` inside the container. The volume keeps it across restarts. No paid database is required.
 
 2. Push to any cloud provider that supports Docker containers
 
