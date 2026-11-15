@@ -8,20 +8,65 @@ from flask_cors import CORS
 import json
 from datetime import datetime
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 app = Flask(__name__, static_folder='static')
 CORS(app)
 news_fetcher = NewsFetcher()
 
-# Store news cache
+# One cache shape for every stock: {"data": [articles], "fetched_at": unix time}.
+# Readers must use cache_get(); the value is not a tuple.
 news_cache = {}
+NEWS_CACHE_TTL_SECONDS = 15 * 60
+
+def cache_put(stock, articles):
+    news_cache[stock] = {
+        "data": articles if isinstance(articles, list) else [],
+        "fetched_at": time.time(),
+    }
+
+def _cache_entry(stock):
+    """Return (articles, fresh) for a {"data", "fetched_at"} entry.
+
+    Expired entries stay in memory so a failed fetch can still serve them
+    with stale=true. Fresh reads go through cache_get().
+    """
+    entry = news_cache.get(stock)
+    if not isinstance(entry, dict):
+        return None, False
+    articles = entry.get("data")
+    fetched_at = entry.get("fetched_at")
+    if not isinstance(articles, list) or not isinstance(fetched_at, (int, float)):
+        news_cache.pop(stock, None)
+        return None, False
+    fresh = time.time() - fetched_at < NEWS_CACHE_TTL_SECONDS
+    return articles, fresh
+
+def cache_get(stock):
+    """Return cached articles, or None when missing or older than the TTL."""
+    articles, fresh = _cache_entry(stock)
+    if not fresh:
+        return None
+    return articles
+
+def cache_peek(stock):
+    """Return the last articles even when the TTL has passed."""
+    articles, _fresh = _cache_entry(stock)
+    return articles
 
 # File to store search history
 HISTORY_FILE = os.environ.get('HISTORY_FILE', 'search_history.json')
 
 def update_news_cache():
-    global news_cache
-    for stock in news_cache.keys():
-        news_cache[stock] = news_fetcher.fetch_news(stock)
+    for stock in list(news_cache.keys()):
+        news = news_fetcher.fetch_news(stock)
+        if getattr(news, "stale", False):
+            continue
+        cache_put(stock, list(news) if isinstance(news, list) else [])
 
 def run_scheduler():
     while True:
@@ -134,36 +179,35 @@ def search():
         if not stock:
             return jsonify({'error': 'Stock symbol is required', 'news': []}), 400
         
-        # Check if we already have this stock in the cache
-        if stock in news_cache and not force_refresh:
+        served_cached = False
+        stale = False
+        news = None if force_refresh else cache_get(stock)
+        if news is not None:
+            served_cached = True
             print(f"Using cached news for {stock}")
-            news = news_cache[stock]
         else:
-            # Only clear cache if specifically requested or not in cache
             if force_refresh:
                 print(f"{stock} search detected - forcing refresh of cache and fetching fresh news")
-                # If we have the stock in cache, remove it to force a fresh fetch
-                if stock in news_cache:
-                    del news_cache[stock]
             else:
                 print(f"{stock} search detected - fetching fresh news")
-            
-            # Fetch fresh news
-            news = news_fetcher.fetch_news(stock)
-            
-            # Store in cache for future use
-            news_cache[stock] = news
-        
-        # Make sure news is always a list
-        if not isinstance(news, list):
-            print(f"Warning: News is not a list, converting. Type: {type(news)}")
-            try:
-                news = list(news) if news else []
-            except:
-                news = []
-        
-        # Filter out any non-dictionary items
-        news = [item for item in news if isinstance(item, dict)]
+            news = news_fetcher.fetch_news(stock, force=force_refresh)
+            stale = bool(getattr(news, "stale", False))
+            if not isinstance(news, list):
+                print(f"Warning: News is not a list, converting. Type: {type(news)}")
+                try:
+                    news = list(news) if news else []
+                except TypeError:
+                    news = []
+            news = [item for item in news if isinstance(item, dict)]
+            if stale:
+                previous = cache_peek(stock)
+                if previous and not news:
+                    news = previous
+            else:
+                cache_put(stock, news)
+
+        if served_cached:
+            news = [item for item in news if isinstance(item, dict)]
         
         # Update search history
         history = load_history()
@@ -179,14 +223,28 @@ def search():
         return jsonify({
             'news': news,
             'history': history,
-            'cached': stock in news_cache and not force_refresh
+            'cached': served_cached,
+            'stale': stale,
         })
     except Exception as e:
-        print(f"Error in search endpoint: {str(e)}")
+        print(f"Error in search endpoint: {e.__class__.__name__}")
+        previous = []
+        try:
+            previous = cache_peek(stock) or []
+        except Exception:
+            previous = []
+        if previous:
+            return jsonify({
+                'news': previous,
+                'history': load_history(),
+                'cached': False,
+                'stale': True,
+            })
         return jsonify({
-            'error': f"Server error: {str(e)}",
+            'error': f"Server error: {e.__class__.__name__}",
             'news': [],
-            'history': load_history()
+            'history': load_history(),
+            'stale': False,
         }), 500
 
 @app.route('/api/suggest')
@@ -216,38 +274,44 @@ def delete_history_item(stock):
 
 @app.route('/api/cache-status/<stock>', methods=['GET'])
 def check_cache_status(stock):
-    """Check if a stock has cached news data available.
+    """Check if a stock has cached news data available within the TTL.
 
-    The app cache stores a list of articles. An older version of this route
-    unpacked that list as (data, timestamp) and crashed whenever a stock was cached.
+    Entries are {"data", "fetched_at"}. This route used to unpack the stored
+    value as a tuple, which crashed when the cache held a list of articles.
     """
     return jsonify({
         "stock": stock,
-        "hasCache": stock in news_cache
+        "hasCache": cache_get(stock) is not None
     })
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
     stock = request.args.get('stock', '')
     if not stock:
-        # Handle specific requests for market indices
         index = request.args.get('index', '')
         if index in ['NIFTY50', 'DOWJONES']:
-            fetcher = NewsFetcher()
-            news = fetcher.fetch_index_news(index)
-            return jsonify({'news': news})
+            news = news_fetcher.fetch_index_news(index)
+            return jsonify({
+                'news': list(news),
+                'stale': bool(getattr(news, 'stale', False)),
+            })
         return jsonify({'error': 'Stock parameter is required'}), 400
-        
-    # Process regular stock requests
-    fetcher = NewsFetcher()
-    news = fetcher.fetch_news(stock)
-    return jsonify({'news': news})
+
+    news = news_fetcher.fetch_news(stock)
+    return jsonify({
+        'news': list(news),
+        'stale': bool(getattr(news, 'stale', False)),
+    })
+
+def debug_from_env():
+    """FLASK_DEBUG is off unless the environment explicitly turns it on."""
+    return os.environ.get("FLASK_DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
 
 if __name__ == '__main__':
     # For local development. Ignore history writes so a search does not
     # restart the reloader and drop the in-memory news cache.
     app.run(
-        debug=True,
+        debug=debug_from_env(),
         host='0.0.0.0',
         port=int(os.environ.get('PORT', 5000)),
         exclude_patterns=['*search_history.json'],

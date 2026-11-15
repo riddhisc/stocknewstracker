@@ -1101,7 +1101,7 @@
 
             const symbol = document.getElementById('stockInput').value.trim() || 'Results';
             let html = '';
-            if (data.cached) {
+            if (data.cached || data.stale) {
                 html += `
                     <div class="cache-note">
                         <span>Showing an earlier copy of these headlines.</span>
@@ -1259,7 +1259,8 @@
         async function loadDefaultIndexNews() {
             try {
                 if (clientCache.has('NIFTY50')) {
-                    displayIndexNews('nifty-news-container', clientCache.get('NIFTY50').news, 'Nifty 50');
+                    const cachedNifty = clientCache.get('NIFTY50');
+                    displayIndexNews('nifty-news-container', cachedNifty.news, 'Nifty 50', cachedNifty.cached || cachedNifty.stale);
                 } else {
                     const niftyResponse = await fetch('/search', {
                         method: 'POST',
@@ -1270,7 +1271,7 @@
                         const data = await niftyResponse.json();
                         data.timestamp = Date.now();
                         clientCache.set('NIFTY50', data);
-                        displayIndexNews('nifty-news-container', data.news, 'Nifty 50');
+                        displayIndexNews('nifty-news-container', data.news, 'Nifty 50', data.cached || data.stale);
                         updateRecentSearchesDisplay();
                     } else {
                         document.getElementById('nifty-news-container').innerHTML = `
@@ -1287,7 +1288,8 @@
 
             try {
                 if (clientCache.has('DOWJONES')) {
-                    displayIndexNews('dowjones-news-container', clientCache.get('DOWJONES').news, 'Dow Jones');
+                    const cachedDow = clientCache.get('DOWJONES');
+                    displayIndexNews('dowjones-news-container', cachedDow.news, 'Dow Jones', cachedDow.cached || cachedDow.stale);
                 } else {
                     const dowResponse = await fetch('/search', {
                         method: 'POST',
@@ -1298,7 +1300,7 @@
                         const data = await dowResponse.json();
                         data.timestamp = Date.now();
                         clientCache.set('DOWJONES', data);
-                        displayIndexNews('dowjones-news-container', data.news, 'Dow Jones');
+                        displayIndexNews('dowjones-news-container', data.news, 'Dow Jones', data.cached || data.stale);
                         updateRecentSearchesDisplay();
                     } else {
                         document.getElementById('dowjones-news-container').innerHTML = `
@@ -1314,7 +1316,7 @@
             }
         }
 
-        function displayIndexNews(containerId, news, indexName) {
+        function displayIndexNews(containerId, news, indexName, earlier) {
             const container = document.getElementById(containerId);
             if (!container) return;
 
@@ -1328,7 +1330,11 @@
             }
 
             const symbol = indexName === 'Nifty 50' ? 'NIFTY50' : 'DOWJONES';
-            let html = news.slice(0, 5).filter(Boolean).map(storyHtml).join('');
+            let html = '';
+            if (earlier) {
+                html += `<div class="cache-note"><span>Showing an earlier copy of these headlines.</span></div>`;
+            }
+            html += news.slice(0, 5).filter(Boolean).map(storyHtml).join('');
             html += `<p style="margin: 8px 0 16px;"><button type="button" class="text-btn" onclick="loadFullIndexNews('${symbol}')">All ${esc(indexName)} stories</button></p>`;
             container.innerHTML = html;
         }
