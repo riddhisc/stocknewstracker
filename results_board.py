@@ -113,6 +113,7 @@ def _public_block(symbol, name, block):
         "name": name or symbol,
         "next_date": nxt.get("date"),
         "next_period": nxt.get("period"),
+        "date_status": nxt.get("status") or ("estimated" if "finance.yahoo.com" in str(nxt.get("source_url") or block.get("source_url") or "") else "confirmed" if nxt.get("date") else None),
         "source_url": nxt.get("source_url") or block.get("source_url"),
         "updated_at": block.get("updated_at"),
         "stale": bool(block.get("stale")),

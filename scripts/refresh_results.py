@@ -5,12 +5,12 @@ Run from the repo root:
     python scripts/refresh_results.py
     python scripts/refresh_results.py --symbol RELIANCE --timeout 25
 
-Primary source is Yahoo Finance via yfinance (SYMBOL.NS). If that call does not
-return an upcoming date, the script tries the public NSE event calendar and
-BSE scrip search / board-meeting endpoints. No API key is required.
+Quarter dates prefer the public NSE event calendar and BSE board-meeting
+endpoints. Yahoo Finance is used as a clearly marked estimate when neither
+exchange has announced a date. No API key is required.
 
 Figures are stored only when the source returns them. A failed fetch keeps the
-previous block for that symbol and sets stale to true. Nothing here is estimated.
+previous block for that symbol and sets stale to true.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ DATA = ROOT / "data"
 WATCHLIST_PATH = DATA / "watchlist.json"
 SYMBOLS_PATH = DATA / "symbols.json"
 RESULTS_PATH = DATA / "results.json"
+OFFICIAL_QUARTER_OVERRIDES_PATH = DATA / "official_quarter_overrides.json"
 IST = ZoneInfo("Asia/Kolkata")
 
 BROWSER_HEADERS = {
@@ -348,6 +349,42 @@ def quarters_from_frame(frame):
     return quarters
 
 
+def apply_official_quarter_overrides(symbol, quarters):
+    """Fill source gaps with verified company filings without losing comparisons."""
+    overrides = load_json(OFFICIAL_QUARTER_OVERRIDES_PATH, {}).get(symbol, [])
+    if not overrides:
+        return quarters
+
+    merged = {item.get("period_end"): dict(item) for item in quarters if item.get("period_end")}
+    for item in overrides:
+        period_end = item.get("period_end")
+        if not period_end:
+            continue
+        merged[period_end] = {**merged.get(period_end, {}), **item, "official_source": True}
+
+    ordered = sorted(merged.values(), key=lambda item: item["period_end"], reverse=True)[:8]
+
+    def prior(index, low_days, high_days):
+        current = date.fromisoformat(ordered[index]["period_end"])
+        for older in ordered[index + 1:]:
+            gap = (current - date.fromisoformat(older["period_end"])).days
+            if low_days <= gap <= high_days:
+                return older
+        return None
+
+    for index, quarter in enumerate(ordered):
+        previous = prior(index, 80, 110)
+        year_ago = prior(index, 350, 380)
+        for field in ("revenue", "net_profit", "eps"):
+            quarter[f"{field}_qoq_pct"] = pct_change(
+                quarter.get(field), previous.get(field) if previous else None
+            )
+            quarter[f"{field}_yoy_pct"] = pct_change(
+                quarter.get(field), year_ago.get(field) if year_ago else None
+            )
+    return ordered
+
+
 def upcoming_from_yfinance(ticker, today):
     candidates = []
     frame = None
@@ -384,7 +421,11 @@ def fetch_yfinance(symbol, timeout, today):
     def load():
         ticker = yf.Ticker(f"{symbol}.NS")
         frame = ticker.quarterly_income_stmt
-        if frame is None or getattr(frame, "empty", True):
+        if frame is None or getattr(frame, "empty", True) or len(getattr(frame, "columns", [])) < 8:
+            alternate = getattr(ticker, "quarterly_financials", None)
+            if alternate is not None and not getattr(alternate, "empty", True):
+                frame = alternate
+        if frame is None or getattr(frame, "empty", True) or len(getattr(frame, "columns", [])) < 8:
             getter = getattr(ticker, "get_income_stmt", None)
             frame = getter(freq="quarterly") if getter else frame
         earnings_date = upcoming_from_yfinance(ticker, today)
@@ -495,7 +536,7 @@ def fetch_nse_date(symbol, timeout, today):
     return None
 
 
-def next_result_block(symbol, earnings_date, latest_period_end, source_url):
+def next_result_block(symbol, earnings_date, latest_period_end, source_url, date_source=None):
     period = None
     if earnings_date is not None and latest_period_end is not None:
         inferred_end = add_quarter(latest_period_end)
@@ -507,6 +548,11 @@ def next_result_block(symbol, earnings_date, latest_period_end, source_url):
         "date": earnings_date.isoformat() if earnings_date else None,
         "period": period,
         "source_url": source_url,
+        "status": (
+            "estimated" if date_source == "yahoo"
+            else "confirmed" if date_source in {"nse", "bse"}
+            else None
+        ),
     }
 
 
@@ -526,11 +572,13 @@ def refresh_symbol(symbol, previous, timeout, today, now):
     links = company_links(symbol)
     quarters = []
     earnings_date = None
+    yahoo_earnings_date = None
     yahoo_error = None
     annual = []
     annual_error = None
     try:
-        quarters, earnings_date = fetch_yfinance(symbol, timeout, today)
+        quarters, yahoo_earnings_date = fetch_yfinance(symbol, timeout, today)
+        quarters = apply_official_quarter_overrides(symbol, quarters)
     except Exception as exc:
         yahoo_error = f"{exc.__class__.__name__}: {exc}"
         print(f"  Yahoo Finance failed: {yahoo_error}")
@@ -540,15 +588,14 @@ def refresh_symbol(symbol, previous, timeout, today, now):
         annual_error = exc.__class__.__name__
         print(f"  Yahoo annual history failed: {annual_error}")
 
-    date_source = "yahoo" if earnings_date is not None else None
-    if earnings_date is None:
-        nse_date = fetch_nse_date(symbol, min(timeout, 12), today)
-        if nse_date is not None:
-            earnings_date = nse_date
-            date_source = "nse"
-            links["nse_calendar"] = (
-                "https://www.nseindia.com/companies-listing/corporate-filings-event-calendar"
-            )
+    date_source = None
+    nse_date = fetch_nse_date(symbol, min(timeout, 12), today)
+    if nse_date is not None:
+        earnings_date = nse_date
+        date_source = "nse"
+        links["nse_calendar"] = (
+            "https://www.nseindia.com/companies-listing/corporate-filings-event-calendar"
+        )
     if earnings_date is None:
         bse_code, bse_date = fetch_bse_date(symbol, min(timeout, 12), today)
         if bse_code:
@@ -556,6 +603,9 @@ def refresh_symbol(symbol, previous, timeout, today, now):
         if bse_date is not None:
             earnings_date = bse_date
             date_source = "bse"
+    if earnings_date is None and yahoo_earnings_date is not None:
+        earnings_date = yahoo_earnings_date
+        date_source = "yahoo"
 
     if date_source == "bse" and links.get("bse"):
         source_url = links["bse"]
@@ -570,6 +620,7 @@ def refresh_symbol(symbol, previous, timeout, today, now):
     if not quarters:
         if isinstance(previous, dict) and previous.get("quarters"):
             kept = json.loads(json.dumps(previous))
+            kept["quarters"] = apply_official_quarter_overrides(symbol, kept.get("quarters", []))
             kept["stale"] = True
             if earnings_date is not None:
                 previous_end = None
@@ -577,7 +628,7 @@ def refresh_symbol(symbol, previous, timeout, today, now):
                 if old_quarters:
                     previous_end = to_date(old_quarters[0].get("period_end"))
                 kept["next_result"] = next_result_block(
-                    symbol, earnings_date, previous_end, source_url
+                    symbol, earnings_date, previous_end, source_url, date_source
                 )
             kept["links"] = links
             apply_annual(kept, annual, annual_error, previous)
@@ -585,14 +636,14 @@ def refresh_symbol(symbol, previous, timeout, today, now):
             return kept
         block = empty_block(symbol, now, True)
         block["links"] = links
-        block["next_result"] = next_result_block(symbol, earnings_date, None, source_url)
+        block["next_result"] = next_result_block(symbol, earnings_date, None, source_url, date_source)
         if yahoo_error:
             block["error"] = yahoo_error[:300]
         apply_annual(block, annual, annual_error, previous)
         return block
 
     block = {
-        "next_result": next_result_block(symbol, earnings_date, latest_end, links["yahoo"]),
+        "next_result": next_result_block(symbol, earnings_date, latest_end, links["yahoo"], date_source),
         "quarters": quarters,
         "updated_at": now,
         "stale": False,

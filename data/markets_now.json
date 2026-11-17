@@ -1,15 +1,15 @@
 {
-  "fetched_at": 1794776238.797167,
+  "fetched_at": 1794910340.252415,
   "sections": [
     {
       "id": "markets",
       "title": "Markets",
       "news": [
         {
-          "title": "Indian Stock Market Outlook Next Week, 16 to 20 Nov 2026: Will Sensex, Nifty Remain Bullish Amid FII Buying?",
-          "url": "https://www.goodreturns.in/news/indian-stock-market-outlook-next-week-16-to-20-november-2026-sensex-nifty-targets-key-levels-crude-1547059.html",
-          "source": "Goodreturns",
-          "published_at": "2026-11-14T15:59:00Z",
+          "title": "Sensex Today | Stock Market LIVE Updates: Nifty extends gains to 170 points; Eicher, M&M top gainers",
+          "url": "https://www.cnbctv18.com/market/stock-market-live-updates-sensex-nifty-50-expiry-today-oil-nifty-bank-record-high-bajaj-fin-aegis-senco-share-price-liveblog-20035375.htm",
+          "source": "CNBCTV18",
+          "published_at": "2026-11-17T00:57:00Z",
           "type": "rss"
         }
       ]
@@ -19,10 +19,10 @@
       "title": "Companies",
       "news": [
         {
-          "title": "Reliance Industries shares in focus: 60% jump in MTF book, dethrones HDFC Bank | Should you buy, sell or hold?",
-          "url": "https://www.msn.com/en-in/news/other/reliance-industries-shares-in-focus-60-jump-in-mtf-book-dethrones-hdfc-bank-should-you-buy-sell-or-hold/ar-AA2gI73d",
-          "source": "Mint on MSN",
-          "published_at": "2026-11-03T18:51:42Z",
+          "title": "US Midterm Election results impact on oil and IT shares: Reliance, Indian Oil, TCS, Infosys - 10 stocks from experts",
+          "url": "https://www.livemint.com/market/stock-market-news/us-midterm-election-results-impact-on-oil-and-it-shares-reliance-indian-oil-tcs-infosys-10-stocks-from-experts-11793852592707.html",
+          "source": "Mint",
+          "published_at": "2026-11-04T21:34:00Z",
           "type": "rss"
         }
       ]
@@ -58,10 +58,10 @@
       "title": "Earnings",
       "news": [
         {
-          "title": "Stocks to watch today, November 11: Tata Power, Oil India, MRF, HUL, BHEL and others",
-          "url": "https://www.msn.com/en-in/money/top-stocks/stocks-to-watch-today-november-11-tata-power-oil-india-mrf-hul-bhel-and-others/ar-AA2hbhyo",
-          "source": "ET Now on MSN",
-          "published_at": "2026-11-10T16:00:00Z",
+          "title": "Quarterly Results",
+          "url": "https://www.etnownews.com/topic/quarterly-results",
+          "source": "ET Now",
+          "published_at": "2026-11-16T02:21:00Z",
           "type": "rss"
         }
       ]

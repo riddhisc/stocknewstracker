@@ -10,7 +10,7 @@
                 if (localStorage.getItem('stock-tracker-theme') === 'blue') {
                     document.documentElement.setAttribute('data-theme', 'blue');
                     var meta = document.querySelector('meta[name="theme-color"]');
-                    if (meta) meta.setAttribute('content', '#111111');
+                    if (meta) meta.setAttribute('content', '#12344a');
                 }
             } catch (e) {}
         })();
@@ -41,23 +41,23 @@
         }
 
         html[data-theme="blue"] {
-            --ink: #111111;
-            --ink-soft: #2c2c2c;
-            --paper: #F7F8FC;
+            --ink: #12344a;
+            --ink-soft: #2c5268;
+            --paper: #f0f8fc;
             --card: #ffffff;
-            --line: #E4E6EB;
-            --muted: #6B6E76;
-            --amber: #1B19E6;
-            --amber-deep: #1210C4;
-            --cream: #ffffff;
+            --line: #d3e6f0;
+            --muted: #5d7787;
+            --amber: #2e91c4;
+            --amber-deep: #176b97;
+            --cream: #f7fcff;
             --on-accent: #ffffff;
-            --accent-hover: #1513C9;
-            --ghost-border: #3A3A3A;
-            --mast-muted: #B7B9C2;
-            --chip-bg: #1B19E6;
+            --accent-hover: #257daa;
+            --ghost-border: #5b8298;
+            --mast-muted: #b8d2e0;
+            --chip-bg: #176b97;
             --chip-fg: #ffffff;
-            --chip-bd: #1B19E6;
-            --pick-bg: #1B19E6;
+            --chip-bd: #176b97;
+            --pick-bg: #2e91c4;
             --pick-fg: #ffffff;
         }
         * { box-sizing: border-box; }
@@ -92,7 +92,7 @@
         .theme-switch {
             position: relative; align-self: flex-start; width: 46px; height: 26px; flex: none;
             padding: 0; border: 0; border-radius: 999px; cursor: pointer;
-            background: linear-gradient(90deg, #e09a2b 0 50%, #1B19E6 50% 100%);
+            background: linear-gradient(90deg, #e09a2b 0 50%, #2e91c4 50% 100%);
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
         }
         .theme-switch::after {
@@ -153,9 +153,40 @@
         th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
         th:first-child, td:first-child { text-align: left; }
         th { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; }
-        .story { font-size: 1.05rem; line-height: 1.5; margin: 4px 0 12px; max-width: 62ch; }
-        .chart { width: 100%; max-width: 560px; height: auto; display: block; }
-        .chart-caption { color: var(--muted); font-size: 0.85rem; margin: 4px 0 12px; }
+        .story { font-size: 1.05rem; line-height: 1.5; margin: 4px 0 12px; max-width: 72ch; }
+        .trend-panel { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+        .trend-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 10px; }
+        .trend-heading h3 { font-family: Georgia, "Palatino Linotype", Palatino, serif; font-size: 1.2rem; }
+        .trend-heading span { color: var(--muted); font-size: 0.82rem; }
+        .trend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .trend-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--paper); }
+        .trend-card h4 { margin: 0 0 12px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+        .trend-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 9px 0; font-size: 0.88rem; }
+        .trend-year { color: var(--muted); font-weight: 800; font-size: 0.86rem; }
+        .trend-track { height: 7px; background: color-mix(in srgb, var(--line) 65%, transparent); border-radius: 999px; overflow: hidden; }
+        .trend-fill { display: block; height: 100%; background: var(--amber); border-radius: inherit; min-width: 4px; }
+        .trend-row.is-selected .trend-fill { background: var(--ink); }
+        .trend-row.is-selected.is-up .trend-fill { background: #2f7a4a; }
+        .trend-row.is-selected.is-down .trend-fill { background: var(--danger); }
+        .trend-value { font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; font-size: 0.98rem; font-weight: 750; }
+        .trend-callout { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--amber); background: var(--paper); color: var(--ink-soft); line-height: 1.5; }
+        .trend-disclaimer { color: var(--muted); font-size: 0.78rem; margin-top: 10px; }
+        .quarterly-overview { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 16px; }
+        .quarterly-overview h3 { font-family: Georgia, "Palatino Linotype", Palatino, serif; font-size: 1.2rem; margin-bottom: 4px; }
+        .quarterly-overview > p { color: var(--muted); font-size: 0.84rem; margin-bottom: 12px; }
+        .quarter-fallback { display: block; margin-top: 4px; color: var(--amber); font-weight: 650; }
+        .quarter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .quarter-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--paper); min-width: 0; }
+        .quarter-card h4 { margin: 0 0 3px; font-size: 1.08rem; }
+        .quarter-period { color: var(--muted); font-size: 0.82rem; }
+        .quarter-metric { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; font-size: 0.88rem; }
+        .quarter-metric span { color: var(--muted); font-weight: 650; }
+        .quarter-metric strong { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); font-size: 1rem; }
+        .quarter-change { display: block; margin-top: 4px; font-size: 0.82rem; font-weight: 750; line-height: 1.35; }
+        .quarter-qoq { display: block; margin-top: 2px; font-weight: 650; }
+        .quarter-change.is-up { color: #2f7a4a; }
+        .quarter-change.is-down { color: var(--danger); }
+        .quarter-change.is-flat, .quarter-change.is-missing { color: var(--muted); }
         .note { color: var(--muted); margin-top: 8px; }
         .warn { color: var(--danger); font-weight: 700; }
         .state { padding: 28px 8px; color: var(--muted); }
@@ -163,6 +194,10 @@
             .mast-top { align-items: flex-start; }
             .ghost-btn span { display: none; }
             h1 { font-size: 1.15rem; }
+            .trend-grid { grid-template-columns: 1fr; }
+            .quarter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .trend-heading { align-items: flex-start; flex-direction: column; }
+            .trend-row { grid-template-columns: 42px minmax(0, 1fr) auto; gap: 6px; }
         }
     </style>
 </head>
@@ -229,7 +264,7 @@
         }
 
         function whenClass(label) {
-            return label === 'date passed' || label === 'date unknown' ? ' style="background:transparent;color:var(--muted);border:1px solid var(--line)"' : '';
+            return label.startsWith('Result announced') || label === 'Not announced' ? ' style="background:transparent;color:var(--muted);border:1px solid var(--line)"' : '';
         }
 
         async function loadBoard() {
@@ -257,11 +292,11 @@
             const years = item.years || [];
             const year = years[0] || '';
             const hasFigures = (Array.isArray(item.quarters) && item.quarters.length > 0) || (Array.isArray(item.annual) && item.annual.length > 0);
-            const dateLabel = item.next_date ? daysLabel(item.next_date) : 'date unknown';
+            const dateLabel = item.next_date ? daysLabel(item.next_date, item.date_status) : 'Not announced';
             detail.innerHTML = `
                 <p class="eyebrow">${esc(item.symbol)}</p>
                 <h2>${esc(item.name || item.symbol)}</h2>
-                <p style="margin-top:10px;">Next result ${item.next_date ? esc(item.next_date) : 'date unknown'}${item.next_period ? ' · ' + esc(item.next_period) : ''}</p>
+                <p style="margin-top:10px;">Next result ${item.next_date ? esc(item.next_date) : 'Not announced'}${item.next_period ? ' · ' + esc(item.next_period) : ''}</p>
                 <span class="when-badge"${whenClass(dateLabel)}>${esc(dateLabel)}</span>
                 ${item.stale && hasFigures ? '<p class="note warn">Showing the last saved figures. The latest fetch did not replace them.</p>' : ''}
                 ${hasFigures ? `
@@ -496,54 +531,131 @@
             return { text: lines.join(' '), revenue, profit, prior };
         }
 
-        function barPair(title, change, priorLabel, yearLabel, originX) {
-            const max = Math.max(change.then, change.now);
-            const height = (value) => (max > 0 && value > 0 ? Math.round((value / max) * 112) : 0);
-            const earlierHeight = height(change.then);
-            const currentHeight = height(change.now);
-            const up = '#128a3e';
-            const down = '#d32020';
-            const selectedUp = change.now >= change.then;
-            const earlierColor = change.now === change.then ? up : (selectedUp ? down : up);
-            const currentColor = selectedUp ? up : down;
-            const base = 148;
-            const earlierX = originX + 28;
-            const currentX = originX + 92;
+        function trendRows(item, period) {
+            const metricValue = (value) => value === null || value === undefined || value === '' ? null : (Number.isFinite(Number(value)) ? Number(value) : null);
+            if (period && period !== 'year') {
+                return (item.quarters || [])
+                    .filter((row) => quarterTag(row.period) === period && metricValue(row.revenue) !== null)
+                    .map((row) => ({ label: yearTag(row.period), revenue: metricValue(row.revenue), profit: metricValue(row.net_profit) }))
+                    .sort((a, b) => a.label.localeCompare(b.label));
+            }
+            return (item.annual || [])
+                .filter((row) => row && row.period && metricValue(row.revenue) !== null)
+                .map((row) => ({ label: row.period, revenue: metricValue(row.revenue), profit: metricValue(row.net_profit) }))
+                .sort((a, b) => a.label.localeCompare(b.label));
+        }
+
+        function trendMetric(title, rows, field, selectedLabel) {
+            const usable = rows.filter((row) => Number.isFinite(row[field]) && row[field] >= 0);
+            if (!usable.length) return '';
+            const max = Math.max(...usable.map((row) => row[field]), 1);
+            const selectedIndex = usable.findIndex((row) => row.label === selectedLabel);
+            const selected = selectedIndex >= 0 ? usable[selectedIndex] : usable[usable.length - 1];
+            const previous = usable[Math.max(0, selectedIndex - 1)];
+            const direction = previous && selected[field] > previous[field] ? 'is-up' : previous && selected[field] < previous[field] ? 'is-down' : '';
             return `
-                <text x="${originX + 78}" y="18" text-anchor="middle" fill="var(--ink)" font-size="14" font-family="Segoe UI, Helvetica, Arial, sans-serif">${esc(title)}</text>
-                <rect x="${earlierX}" y="${base - earlierHeight}" width="42" height="${earlierHeight}" rx="6" fill="${earlierColor}"></rect>
-                <rect x="${currentX}" y="${base - currentHeight}" width="42" height="${currentHeight}" rx="6" fill="${currentColor}"></rect>
-                <text x="${earlierX + 21}" y="168" text-anchor="middle" fill="var(--muted)" font-size="12" font-family="Segoe UI, Helvetica, Arial, sans-serif">${esc(priorLabel)}</text>
-                <text x="${currentX + 21}" y="168" text-anchor="middle" fill="var(--ink)" font-size="12" font-family="Segoe UI, Helvetica, Arial, sans-serif">${esc(yearLabel)}</text>
-            `;
+                <div class="trend-card">
+                    <h4>${esc(title)}</h4>
+                    ${usable.map((row) => `
+                        <div class="trend-row${row.label === selectedLabel ? ' is-selected ' + direction : ''}">
+                            <span class="trend-year">${esc(row.label)}</span>
+                            <span class="trend-track"><span class="trend-fill" style="width:${Math.max(4, Math.round((row[field] / max) * 100))}%"></span></span>
+                            <span class="trend-value">${esc(formatFigure(row[field]))}</span>
+                        </div>`).join('')}
+                </div>`;
+        }
+
+        function trendSentence(rows, selectedLabel) {
+            if (rows.length < 2) return 'There is not enough year-by-year data here to identify a reliable trend.';
+            const latest = rows.find((row) => row.label === selectedLabel) || rows[rows.length - 1];
+            const latestIndex = rows.indexOf(latest);
+            const previous = rows[latestIndex - 1] || rows[rows.length - 2];
+            const pct = (current, prior) => prior && Number.isFinite(current) && Number.isFinite(prior) ? Math.round(((current - prior) / Math.abs(prior)) * 100) : null;
+            const revenueChange = pct(latest.revenue, previous.revenue);
+            const profitChange = pct(latest.profit, previous.profit);
+            const direction = (value, label) => value === null ? `${label} is unavailable` : value > 0 ? `${label} grew ${value}%` : value < 0 ? `${label} fell ${Math.abs(value)}%` : `${label} was flat`;
+            const revenueDirection = rows[rows.length - 1].revenue >= rows[0].revenue ? 'Revenue has generally grown' : 'Revenue has generally declined';
+            const profitDirection = rows[rows.length - 1].profit >= rows[0].profit ? 'profit has generally grown' : 'profit has generally declined';
+            return `${latest.label}: ${direction(revenueChange, 'revenue')} and ${direction(profitChange, 'profit')} versus ${previous.label}. Across the available ${rows.length}-year history, ${revenueDirection.toLowerCase()} and ${profitDirection}.`;
+        }
+
+        function quarterChange(current, previous) {
+            if (current === null || previous === null || previous === 0 || !Number.isFinite(current) || !Number.isFinite(previous)) return null;
+            return Math.round(((current - previous) / Math.abs(previous)) * 100);
+        }
+
+        function quarterMetric(label, current, previous, qoq) {
+            const change = quarterChange(current, previous);
+            const qoqText = Number.isFinite(Number(qoq)) ? `<br><span class="quarter-qoq">QoQ ${Number(qoq) > 0 ? '+' : ''}${Number(qoq)}%</span>` : '';
+            const changeText = change === null ? 'YoY unavailable' : change > 0 ? `▲ ${change}% vs last year` : change < 0 ? `▼ ${Math.abs(change)}% vs last year` : '— flat vs last year';
+            const changeClass = change === null ? 'is-missing' : change > 0 ? 'is-up' : change < 0 ? 'is-down' : 'is-flat';
+            return `<div class="quarter-metric"><span>${esc(label)}</span><strong>${current === null ? '—' : esc(formatFigure(current))}</strong></div><span class="quarter-change ${changeClass}"><span>${changeText}</span>${qoqText}</span>`;
+        }
+
+        function quarterlyOverview(item, year) {
+            const quarterRows = item.quarters || [];
+            const availableYears = [...new Set(quarterRows.map((row) => yearTag(row.period)).filter(Boolean))]
+                .sort((a, b) => Number(b.slice(2)) - Number(a.slice(2)));
+            const displayYear = availableYears.includes(year) ? year : (availableYears[0] || year);
+            const prior = priorTag(displayYear);
+            const fallbackNote = displayYear !== year
+                ? `<span class="quarter-fallback">Quarterly data for ${esc(year)} is unavailable. Showing latest available data for ${esc(displayYear)}.</span>`
+                : '';
+            const cards = ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
+                const current = findQuarter(quarterRows, displayYear, quarter);
+                const previous = findQuarter(quarterRows, prior, quarter);
+                const currentRevenue = current && current.revenue !== null && current.revenue !== undefined ? Number(current.revenue) : null;
+                const previousRevenue = previous && previous.revenue !== null && previous.revenue !== undefined ? Number(previous.revenue) : null;
+                const currentProfit = current && current.net_profit !== null && current.net_profit !== undefined ? Number(current.net_profit) : null;
+                const previousProfit = previous && previous.net_profit !== null && previous.net_profit !== undefined ? Number(previous.net_profit) : null;
+                const hasData = currentRevenue !== null || currentProfit !== null;
+                return `<article class="quarter-card">
+                    <h4>${quarter}</h4>
+                    <div class="quarter-period">${esc(displayYear)} vs ${esc(prior || 'previous year')}</div>
+                    ${hasData ? quarterMetric('Revenue', currentRevenue, previousRevenue, current && current.revenue_qoq_pct) + quarterMetric('Profit', currentProfit, previousProfit, current && current.net_profit_qoq_pct) : `<p class="note">No ${esc(displayYear)} data available</p>`}
+                </article>`;
+            }).join('');
+            return `<section class="quarterly-overview"><h3>Quarterly comparison</h3><p>Each quarter compares ${esc(displayYear)} with the same quarter in ${esc(prior || 'the previous year')}.${fallbackNote}</p><div class="quarter-grid">${cards}</div></section>`;
         }
 
         function drawComparison(item, year, period) {
             const host = document.getElementById('yearCompare');
             if (!host) return;
-            const quarter = period && period !== 'year' ? period : '';
-            const story = quarter ? quarterStory(item, year, quarter) : comparisonStory(item, year);
-            const groups = [];
-            if (story.revenue && story.revenue.then > 0 && story.revenue.now > 0) groups.push({ title: 'Sales', change: story.revenue });
-            if (story.profit && story.profit.then > 0 && story.profit.now > 0) groups.push({ title: 'Profit', change: story.profit });
-            const currentLabel = story.currentLabel || year;
-            const caption = quarter ? 'Taller bar means more than the same quarter last year.' : 'Taller bar means more than the year before.';
-            const chart = groups.length
-                ? `<svg class="chart" viewBox="0 0 ${groups.length * 180} 184" role="img" aria-label="${esc(story.text)}">${groups.map((group, index) => barPair(group.title, group.change, story.prior, currentLabel, index * 180)).join('')}</svg><p class="chart-caption">${caption}</p>`
-                : '';
-            host.innerHTML = `<p class="story">${esc(story.text)}</p>${chart}`;
+            const availableRows = trendRows(item, period);
+            const selectedLabel = period && period !== 'year' ? `${period} ${year}` : year;
+            const selected = availableRows.find((row) => row.label === selectedLabel);
+            // Never substitute another year when the user selected a specific quarter.
+            // That made FY26 appear while the controls were set to (for example) FY24/Q3.
+            const rows = period && period !== 'year' && !selected ? [] : availableRows;
+            const label = selected ? selected.label : rows.length ? rows[rows.length - 1].label : year;
+            const summary = trendSentence(rows, label);
+            const range = rows.length ? `${rows[0].label}–${rows[rows.length - 1].label}` : 'available history';
+            host.innerHTML = rows.length ? `
+                <div class="trend-panel">
+                    <div class="trend-heading"><h3>Performance trend</h3><span>${esc(range)} · ${period && period !== 'year' ? esc(period) + ' comparison' : 'annual comparison'}</span></div>
+                    <p class="story">${esc(summary)}</p>
+                    <div class="trend-grid">
+                        ${trendMetric('Revenue', rows, 'revenue', label)}
+                        ${trendMetric('Net profit', rows, 'profit', label)}
+                    </div>
+                    <p class="trend-callout">Read this as business momentum: rising bars suggest growth, while falling bars suggest pressure. It does not by itself tell you whether the stock is a good investment; valuation, debt, cash flow, price, and risk are not included here.</p>
+                    <p class="trend-disclaimer">Values are reported figures from the available company data. Missing years or quarters are not treated as zero.</p>
+                </div>${(!period || period === 'year') ? quarterlyOverview(item, year) : ''}` : `<div class="trend-panel"><div class="trend-heading"><h3>Performance trend</h3><span>${esc(year)} · ${esc(period || 'annual')} comparison</span></div><p class="note">No ${esc(period || 'quarterly')} data is available for ${esc(year)}.</p></div>`;
         }
 
-        function daysLabel(iso) {
+        function daysLabel(iso, status) {
             const day = new Date(iso + 'T00:00:00');
-            if (Number.isNaN(day.getTime())) return 'date unknown';
+            if (Number.isNaN(day.getTime())) return 'Not announced';
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const delta = Math.round((day - today) / 86400000);
-            if (delta < 0) return 'date passed';
-            if (delta === 0) return 'today';
-            if (delta === 1) return 'in 1 day';
-            return 'in ' + delta + ' days';
+            if (delta <= 0) {
+                const days = Math.abs(delta);
+                if (days > 5) return 'Not announced';
+                return days === 0 ? 'Result announced today' : `Result announced ${days} day${days === 1 ? '' : 's'} ago`;
+            }
+            const label = delta === 1 ? 'in 1 day' : 'in ' + delta + ' days';
+            return status === 'estimated' ? 'Expected ' + label : label;
         }
 
         function drawTable(item, year, period) {
@@ -673,7 +785,7 @@
                 if (theme === 'blue') document.documentElement.setAttribute('data-theme', 'blue');
                 else document.documentElement.removeAttribute('data-theme');
                 var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute('content', theme === 'blue' ? '#111111' : '#141210');
+                if (meta) meta.setAttribute('content', theme === 'blue' ? '#12344a' : '#141210');
                 if (toggle) toggle.setAttribute('aria-pressed', theme === 'blue' ? 'true' : 'false');
             }
             if (toggle) {

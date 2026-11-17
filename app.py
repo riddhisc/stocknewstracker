@@ -32,6 +32,9 @@ news_fetcher = NewsFetcher()
 # One cache shape for every stock: {"data": [articles], "fetched_at": unix time}.
 # Readers must use cache_get(); the value is not a tuple.
 news_cache = {}
+watchlist_snapshot = None
+watchlist_snapshot_at = 0.0
+watchlist_refresh_lock = threading.Lock()
 # config.yaml is the news desk. data/watchlist.json is the results calendar
 # read by scripts/refresh_results.py. They are not the same list.
 APP_CONFIG = load_config()
@@ -89,6 +92,9 @@ def cache_peek(stock):
 HISTORY_DB = os.environ.get("HISTORY_DB", "search_history.db")
 HISTORY_FILE = os.environ.get("HISTORY_FILE", "search_history.json")
 history_store = HistoryStore(HISTORY_DB, HISTORY_FILE)
+# Search history is now browser-local. Clear the legacy shared search rows once
+# on startup so an older server database cannot expose another user's searches.
+history_store.clear()
 
 def update_news_cache():
     for stock in list(news_cache.keys()):
@@ -294,12 +300,9 @@ def search():
             news = real_articles(news)
 
         news = attach_summaries(news, stock)
-        history_store.append(stock, len(news))
-        history = load_history()
-        
         return jsonify({
             'news': news,
-            'history': history,
+            'history': [],
             'cached': served_cached,
             'stale': stale,
         })
@@ -314,14 +317,14 @@ def search():
         if previous:
             return jsonify({
                 'news': previous,
-                'history': load_history(),
+                'history': [],
                 'cached': False,
                 'stale': True,
             })
         return jsonify({
             'error': f"Server error: {e.__class__.__name__}",
             'news': [],
-            'history': load_history(),
+            'history': [],
             'stale': False,
         }), 500
 
@@ -357,30 +360,61 @@ def watchlist_news():
     Read-only. data/watchlist.json is a different list: it drives
     scripts/refresh_results.py and is not read here.
     """
+    global watchlist_snapshot, watchlist_snapshot_at
+    now = time.time()
+    if watchlist_snapshot is None:
+        watchlist_snapshot = _build_watchlist_snapshot()
+        watchlist_snapshot_at = now
+    elif now - watchlist_snapshot_at >= NEWS_CACHE_TTL_SECONDS:
+        if watchlist_refresh_lock.acquire(blocking=False):
+            threading.Thread(target=_refresh_watchlist_snapshot, daemon=True).start()
+    return jsonify({"items": watchlist_snapshot, "cached": True, "stale": now - watchlist_snapshot_at >= NEWS_CACHE_TTL_SECONDS})
+
+
+def _build_watchlist_snapshot():
     items = []
     for row in APP_CONFIG.watchlist:
-        news = news_fetcher.fetch_news(row["name"])
+        key = row["name"]
+        news = cache_get(key)
+        stale = False
+        if news is None:
+            news = cache_peek(key)
+            stale = bool(news)
+        if news is None:
+            fetched = news_fetcher.fetch_news(key)
+            stale = bool(getattr(fetched, "stale", False))
+            news = real_articles(list(fetched))
+            if news and not stale:
+                cache_put(key, news)
         items.append({
             "name": row["name"],
             "ticker": row["ticker"],
             "aliases": row["aliases"],
-            "news": real_articles(list(news))[:8],
-            "stale": bool(getattr(news, "stale", False)),
+            "news": real_articles(list(news or []))[:8],
+            "stale": stale,
         })
-    return jsonify({"items": items})
+    return items
+
+
+def _refresh_watchlist_snapshot():
+    global watchlist_snapshot, watchlist_snapshot_at
+    try:
+        watchlist_snapshot = _build_watchlist_snapshot()
+        watchlist_snapshot_at = time.time()
+    finally:
+        watchlist_refresh_lock.release()
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
-    return jsonify(load_history())
+    # Deliberately empty: search history belongs to the current browser only.
+    return jsonify([])
 
 @app.route('/api/history', methods=['DELETE'])
 def clear_history():
-    history_store.clear()
     return jsonify({"message": "History cleared"})
 
 @app.route('/api/history/<stock>', methods=['DELETE'])
 def delete_history_item(stock):
-    history_store.delete_stock(stock)
     return jsonify({"message": f"History for {stock} deleted"})
 
 @app.route('/api/cache-status/<stock>', methods=['GET'])
@@ -413,18 +447,21 @@ def _iso_date(value):
     except ValueError:
         return None
 
-def _when_label(date_text):
+def _when_label(date_text, status=None):
     day = _iso_date(date_text)
     if day is None:
-        return "date unknown"
+        return "Not announced"
     delta = (day - datetime.now().date()).days
-    if delta < 0:
-        return "date passed"
-    if delta == 0:
-        return "today"
+    if delta <= 0:
+        days_since = abs(delta)
+        if days_since > 5:
+            return None
+        return "Result announced today" if days_since == 0 else f"Result announced {days_since} day{'s' if days_since != 1 else ''} ago"
     if delta == 1:
-        return "in 1 day"
-    return f"in {delta} days"
+        label = "in 1 day"
+    else:
+        label = f"in {delta} days"
+    return f"Expected {label}" if status == "estimated" else label
 
 def _load_results():
     """Read data/results.json. The request never calls a market-data library."""
@@ -450,7 +487,9 @@ def _load_results():
                     names[str(row["symbol"]).upper()] = row.get("name") or row["symbol"]
     if not isinstance(payload, dict):
         return {"missing": True, "items": [], "updated_at": None, "stale": False}
-    cutoff = datetime.now().astimezone() - timedelta(days=3)
+    # Results are refreshed by the daily workflow. Treat anything older than
+    # one day as stale so the desk never presents multi-day-old data as fresh.
+    cutoff = datetime.now().astimezone() - timedelta(days=1)
     items = []
     newest = None
     section_stale = False
@@ -468,6 +507,9 @@ def _load_results():
             or links.get("screener")
             or f"https://www.screener.in/company/{symbol}/consolidated/"
         )
+        date_status = nxt.get("status")
+        if not date_status and nxt.get("date"):
+            date_status = "estimated" if "finance.yahoo.com" in source_url else "confirmed"
         updated = block.get("updated_at")
         record_stale = bool(block.get("stale"))
         parsed_updated = None
@@ -484,12 +526,16 @@ def _load_results():
                 newest = aware
         if record_stale:
             section_stale = True
+        when = _when_label(nxt.get("date"), date_status)
+        if when is None:
+            continue
         items.append({
             "symbol": symbol,
             "name": names.get(symbol, symbol),
             "next_date": nxt.get("date"),
             "next_period": nxt.get("period"),
-            "when": _when_label(nxt.get("date")),
+            "date_status": date_status,
+            "when": when,
             "latest_period": latest.get("period"),
             "revenue": latest.get("revenue"),
             "net_profit": latest.get("net_profit"),

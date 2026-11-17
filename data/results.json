@@ -13,11 +13,11 @@
         "net_profit": 255480000000.0,
         "eps": 18.88,
         "revenue_qoq_pct": 6.83,
-        "revenue_yoy_pct": null,
+        "revenue_yoy_pct": 27.7,
         "net_profit_qoq_pct": 21.97,
-        "net_profit_yoy_pct": null,
+        "net_profit_yoy_pct": 40.64,
         "eps_qoq_pct": 21.96,
-        "eps_yoy_pct": null
+        "eps_yoy_pct": 40.69
       },
       {
         "period_end": "2026-06-30",
@@ -51,12 +51,26 @@
         "revenue": 2649050000000.0,
         "net_profit": 186450000000.0,
         "eps": 13.78,
-        "revenue_qoq_pct": null,
+        "revenue_qoq_pct": 2.32,
         "revenue_yoy_pct": null,
-        "net_profit_qoq_pct": null,
+        "net_profit_qoq_pct": 2.64,
         "net_profit_yoy_pct": null,
-        "eps_qoq_pct": null,
+        "eps_qoq_pct": 2.68,
         "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2025-09-30",
+        "period": "Q2 FY26",
+        "revenue": 2588980000000,
+        "net_profit": 181650000000,
+        "eps": 13.42,
+        "official_source": true,
+        "revenue_qoq_pct": 6.27,
+        "revenue_yoy_pct": 9.94,
+        "net_profit_qoq_pct": -32.71,
+        "net_profit_yoy_pct": 9.67,
+        "eps_qoq_pct": -32.73,
+        "eps_yoy_pct": 9.64
       },
       {
         "period_end": "2025-06-30",
@@ -70,10 +84,24 @@
         "net_profit_yoy_pct": null,
         "eps_qoq_pct": null,
         "eps_yoy_pct": null
+      },
+      {
+        "period_end": "2024-09-30",
+        "period": "Q2 FY25",
+        "revenue": 2354810000000,
+        "net_profit": 165630000000,
+        "eps": 12.24,
+        "official_source": true,
+        "revenue_qoq_pct": null,
+        "revenue_yoy_pct": null,
+        "net_profit_qoq_pct": null,
+        "net_profit_yoy_pct": null,
+        "eps_qoq_pct": null,
+        "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
-    "stale": false,
+    "updated_at": "2026-11-14T16:24:45+05:30",
+    "stale": true,
     "source_url": "https://finance.yahoo.com/quote/RELIANCE.NS/",
     "links": {
       "yahoo": "https://finance.yahoo.com/quote/RELIANCE.NS/",
@@ -112,7 +140,8 @@
       }
     ],
     "annual_count": 4,
-    "annual_source": "yahoo_fundamentals_timeseries"
+    "annual_source": "yahoo_fundamentals_timeseries",
+    "annual_error": "ConnectionError"
   },
   "KPIGREEN": {
     "next_result": {
@@ -122,30 +151,17 @@
     },
     "quarters": [
       {
-        "period_end": "2026-09-30",
-        "period": "Q2 FY27",
-        "revenue": 7272132000.0,
-        "net_profit": 823987000.0,
-        "eps": 4.15,
-        "revenue_qoq_pct": 4.81,
-        "revenue_yoy_pct": 14.65,
-        "net_profit_qoq_pct": -12.93,
-        "net_profit_yoy_pct": -24.48,
-        "eps_qoq_pct": -3.94,
-        "eps_yoy_pct": -24.55
-      },
-      {
         "period_end": "2026-06-30",
         "period": "Q1 FY27",
         "revenue": 6938402000.0,
         "net_profit": 946328000.0,
         "eps": 4.32,
         "revenue_qoq_pct": -12.81,
-        "revenue_yoy_pct": null,
+        "revenue_yoy_pct": 15.08,
         "net_profit_qoq_pct": -34.87,
-        "net_profit_yoy_pct": null,
+        "net_profit_yoy_pct": -14.99,
         "eps_qoq_pct": -41.14,
-        "eps_yoy_pct": null
+        "eps_yoy_pct": -18.18
       },
       {
         "period_end": "2026-03-31",
@@ -168,7 +184,7 @@
         "eps": 5.94,
         "revenue_qoq_pct": 4.5,
         "revenue_yoy_pct": null,
-        "net_profit_qoq_pct": 15.3,
+        "net_profit_qoq_pct": 7.85,
         "net_profit_yoy_pct": null,
         "eps_qoq_pct": 8.0,
         "eps_yoy_pct": null
@@ -177,21 +193,21 @@
         "period_end": "2025-09-30",
         "period": "Q2 FY26",
         "revenue": 6342979000.0,
-        "net_profit": 1091081000.0,
+        "net_profit": 1166428000.0,
         "eps": 5.5,
-        "revenue_qoq_pct": null,
+        "revenue_qoq_pct": 5.2,
         "revenue_yoy_pct": null,
-        "net_profit_qoq_pct": null,
+        "net_profit_qoq_pct": 4.78,
         "net_profit_yoy_pct": null,
-        "eps_qoq_pct": null,
+        "eps_qoq_pct": 4.17,
         "eps_yoy_pct": null
       },
       {
         "period_end": "2025-06-30",
         "period": "Q1 FY26",
-        "revenue": null,
-        "net_profit": null,
-        "eps": null,
+        "revenue": 6029429000.0,
+        "net_profit": 1113167000.0,
+        "eps": 5.28,
         "revenue_qoq_pct": null,
         "revenue_yoy_pct": null,
         "net_profit_qoq_pct": null,
@@ -213,7 +229,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:01:12+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/KPIGREEN.NS/",
     "links": {
@@ -328,7 +344,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:19+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/TCS.NS/",
     "links": {
@@ -404,7 +420,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:23+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/HDFCBANK.NS/",
     "links": {
@@ -545,7 +561,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:25+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/INFY.NS/",
     "links": {
@@ -686,7 +702,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:28+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/ICICIBANK.NS/",
     "links": {
@@ -699,29 +715,29 @@
       {
         "period_end": "2026-03-31",
         "period": "FY26",
-        "eps": 74.77,
         "revenue": 2234071181000.0,
+        "eps": 74.77,
         "net_profit": 542077028000.0
       },
       {
         "period_end": "2025-03-31",
         "period": "FY25",
-        "eps": 71.14,
         "revenue": 2047152637000.0,
+        "eps": 71.14,
         "net_profit": 510291955000.0
       },
       {
         "period_end": "2024-03-31",
         "period": "FY24",
-        "eps": 61.96,
         "revenue": 1612101952000.0,
+        "eps": 61.96,
         "net_profit": 442563735000.0
       },
       {
         "period_end": "2023-03-31",
         "period": "FY23",
-        "eps": 47.84,
         "revenue": 1355811552000.0,
+        "eps": 47.84,
         "net_profit": 340366408000.0
       }
     ],
@@ -827,7 +843,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:31+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/SBIN.NS/",
     "links": {
@@ -942,7 +958,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:34+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/BHARTIARTL.NS/",
     "links": {
@@ -1070,7 +1086,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:36+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/LT.NS/",
     "links": {
@@ -1141,7 +1157,7 @@
         "revenue_qoq_pct": 7.78,
         "revenue_yoy_pct": -11.1,
         "net_profit_qoq_pct": -18.45,
-        "net_profit_yoy_pct": null,
+        "net_profit_yoy_pct": -16.21,
         "eps_qoq_pct": -18.37,
         "eps_yoy_pct": -16.03
       },
@@ -1153,8 +1169,8 @@
         "eps": 4.3,
         "revenue_qoq_pct": -11.49,
         "revenue_yoy_pct": null,
-        "net_profit_qoq_pct": null,
-        "net_profit_yoy_pct": 9.26,
+        "net_profit_qoq_pct": 9.26,
+        "net_profit_yoy_pct": null,
         "eps_qoq_pct": 9.14,
         "eps_yoy_pct": null
       },
@@ -1162,7 +1178,7 @@
         "period_end": "2025-12-31",
         "period": "Q3 FY26",
         "revenue": 199182400000.0,
-        "net_profit": null,
+        "net_profit": 49311900000.0,
         "eps": 3.94,
         "revenue_qoq_pct": null,
         "revenue_yoy_pct": null,
@@ -1188,7 +1204,7 @@
         "period_end": "2025-06-30",
         "period": "Q1 FY26",
         "revenue": 213729300000.0,
-        "net_profit": null,
+        "net_profit": 52442000000.0,
         "eps": 4.18,
         "revenue_qoq_pct": null,
         "revenue_yoy_pct": null,
@@ -1201,7 +1217,7 @@
         "period_end": "2025-03-31",
         "period": "Q4 FY25",
         "revenue": null,
-        "net_profit": 49311900000.0,
+        "net_profit": null,
         "eps": null,
         "revenue_qoq_pct": null,
         "revenue_yoy_pct": null,
@@ -1211,7 +1227,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:39+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/ITC.NS/",
     "links": {
@@ -1352,7 +1368,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:15:42+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/HINDUNILVR.NS/",
     "links": {
@@ -1480,7 +1496,7 @@
         "eps_yoy_pct": null
       }
     ],
-    "updated_at": "2026-11-17T15:13:05+05:30",
+    "updated_at": "2026-11-15T15:18:59+05:30",
     "stale": false,
     "source_url": "https://finance.yahoo.com/quote/AFFLE.NS/",
     "links": {

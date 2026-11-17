@@ -1,0 +1,18 @@
+{
+  "RELIANCE": [
+    {
+      "period_end": "2025-09-30",
+      "period": "Q2 FY26",
+      "revenue": 2588980000000,
+      "net_profit": 181650000000,
+      "eps": 13.42
+    },
+    {
+      "period_end": "2024-09-30",
+      "period": "Q2 FY25",
+      "revenue": 2354810000000,
+      "net_profit": 165630000000,
+      "eps": 12.24
+    }
+  ]
+}
