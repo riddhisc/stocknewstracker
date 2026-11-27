@@ -40,3 +40,6 @@ data/*.json.tmp
 .vscode/
 .DS_Store
 Thumbs.db
+
+venv/
+reports/
