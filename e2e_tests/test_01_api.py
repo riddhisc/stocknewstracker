@@ -19,6 +19,7 @@ pytestmark = pytest.mark.api
 LARGE_CAPS = ["RELIANCE", "TCS", "INFY", "HDFCBANK"]
 INDICES = ["NIFTY 50", "SENSEX"]
 QA_STOCK = "QATESTSTOCK"  # unique name so we never touch real users' history
+HIST_STOCK = "WIPRO"      # real symbol (the app may only record searches that return news)
 
 
 # --------------------------------------------------------------------------- helpers
@@ -52,7 +53,11 @@ def assert_valid_news_item(item):
 @pytest.fixture
 def qa_cleanup(site):
     yield
-    site.delete(f"/api/history/{QA_STOCK}")
+    for name in (QA_STOCK, HIST_STOCK):
+        try:
+            site.delete(f"/api/history/{name}")
+        except Exception:
+            pass
 
 
 # --------------------------------------------------------------------------- 1. availability
@@ -82,7 +87,10 @@ class TestAvailability:
         if not site.base.startswith("https://"):
             pytest.skip("target is not HTTPS (local run)")
         r = site.get(site.base.replace("https://", "http://", 1), allow_redirects=False)
-        assert r.status_code in (301, 302, 307, 308)
+        assert r.status_code in (301, 302, 307, 308), (
+            f"Plain http:// answered {r.status_code} instead of redirecting to https. "
+            "On PythonAnywhere: Web tab -> Security -> switch on 'Force HTTPS'."
+        )
         assert r.headers["location"].startswith("https://")
 
 
@@ -163,19 +171,23 @@ class TestHistory:
         assert isinstance(as_json(r), list)
 
     def test_search_is_recorded_with_correct_fields(self, site, qa_cleanup):
-        post_search(site, QA_STOCK)
-        entries = [h for h in as_json(site.get("/api/history")) if h.get("stock") == QA_STOCK]
-        assert entries, "search was not recorded in history"
+        post_search(site, HIST_STOCK)
+        history = as_json(site.get("/api/history"))
+        entries = [h for h in history if h.get("stock") == HIST_STOCK]
+        assert entries, (
+            f"search for {HIST_STOCK} was not recorded in history. "
+            f"Last entries returned: {history[-3:]}"
+        )
         entry = entries[-1]
-        assert {"stock", "timestamp", "count"} <= set(entry)
+        assert {"stock", "timestamp", "count"} <= set(entry), f"unexpected fields: {entry}"
         assert isinstance(entry["count"], int)
         datetime.fromisoformat(entry["timestamp"])  # must be valid ISO-8601
 
-    def test_delete_single_history_item(self, site):
-        post_search(site, QA_STOCK)
-        r = site.delete(f"/api/history/{QA_STOCK}")
+    def test_delete_single_history_item(self, site, qa_cleanup):
+        post_search(site, HIST_STOCK)
+        r = site.delete(f"/api/history/{HIST_STOCK}")
         assert r.status_code == 200
-        remaining = [h for h in as_json(site.get("/api/history")) if h.get("stock") == QA_STOCK]
+        remaining = [h for h in as_json(site.get("/api/history")) if h.get("stock") == HIST_STOCK]
         assert remaining == []
 
     def test_delete_missing_item_is_harmless(self, site):

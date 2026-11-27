@@ -2,11 +2,12 @@
 """
 ONE COMMAND TO TEST THE WHOLE APPLICATION
 =========================================
-    python run_tests.py                 # everything (API + browser UI + unit)
+    python run_tests.py                 # everything (API + browser UI + your own unit tests)
     python run_tests.py --suite api     # only API tests      (fast)
     python run_tests.py --suite ui      # only browser tests
-    python run_tests.py --suite unit    # only local unit tests
-    python run_tests.py --suite repo    # your project's own existing tests/ folder
+    python run_tests.py --suite e2e     # API + browser tests (the live-site checks)
+    python run_tests.py --suite unit    # your project's own existing tests/ folder (offline)
+    python run_tests.py --channel chrome  # force the installed Google Chrome for browser tests
     python run_tests.py --headed        # watch the browser click through the site
     python run_tests.py --headed --slowmo 400
     python run_tests.py --browser all   # Chromium + Firefox + WebKit
@@ -35,9 +36,10 @@ E2E = "e2e_tests"
 SUITES = {
     "api": [f"{E2E}/test_01_api.py"],
     "ui": [f"{E2E}/test_02_ui.py"],
-    "unit": [f"{E2E}/test_03_unit_local.py"],
-    "all": [E2E],
-    "repo": ["tests"],  # your project's own existing tests (uses its own pytest config)
+    "e2e": [E2E],
+    "unit": ["tests"],   # your project's own existing tests (use their own pytest config)
+    "repo": ["tests"],   # alias of unit
+    "all": [E2E, "tests"],
 }
 
 os.system("")  # enables ANSI colours in Windows CMD
@@ -56,8 +58,7 @@ def banner(text, colour=C):
 
 def ensure_dependencies():
     needed = {"pytest": "pytest", "playwright": "playwright", "pytest_html": "pytest-html",
-              "pytest_timeout": "pytest-timeout", "requests": "requests",
-              "pytest_base_url": "pytest-base-url"}
+              "pytest_timeout": "pytest-timeout", "requests": "requests"}
     missing = [m for m in needed if importlib.util.find_spec(m) is None]
     if missing:
         print(f"{Y}Installing missing test dependencies: {', '.join(missing)}{X}")
@@ -81,39 +82,80 @@ def preflight(url):
         return False
 
 
-def build_command(args, extra):
+def pick_browser_channel(args):
+    """Chromium that Playwright downloads is sometimes blocked on Windows
+    (antivirus / admin shell -> 'spawn UNKNOWN'). Test-launch it; if that fails,
+    try the Chrome / Edge that is already installed."""
+    if args.channel:
+        return args.channel
+    if args.browser not in ("chromium",) or args.suite in ("unit", "repo"):
+        return None
+    probe = ("from playwright.sync_api import sync_playwright\n"
+             "with sync_playwright() as p:\n"
+             "    b = p.chromium.launch({}); b.close()\n")
+    print("Checking that a browser can start...")
+    for channel in (None, "chrome", "msedge"):
+        arg = f"channel='{channel}'" if channel else ""
+        try:
+            res = subprocess.run([sys.executable, "-c", probe.format(arg)],
+                                 capture_output=True, text=True, timeout=90)
+        except subprocess.TimeoutExpired:
+            continue
+        if res.returncode == 0:
+            label = channel or "Playwright Chromium"
+            print(f"  {G}browser OK:{X} {label}\n")
+            return channel
+    print(f"  {R}No browser could be started{X} - browser tests will error.")
+    print("  Try: open a NORMAL (non-admin) CMD, or run  python -m playwright install chromium --force\n")
+    return None
+
+
+def build_runs(args, extra, channel):
     REPORTS.mkdir(exist_ok=True)
-    if args.suite == "repo":
-        return [sys.executable, "-m", "pytest", *SUITES["repo"],
-                f"--junitxml={REPORTS / 'junit.xml'}"] + extra
-    cmd = [sys.executable, "-m", "pytest", *SUITES[args.suite],
-           "-c", f"{E2E}/pytest.ini", "--rootdir", E2E,
-           f"--base-url={args.url}",
-           f"--html={REPORTS / 'report.html'}", "--self-contained-html",
-           f"--junitxml={REPORTS / 'junit.xml'}",
-           "--screenshot=only-on-failure", "--tracing=retain-on-failure",
-           f"--output={REPORTS / 'artifacts'}"]
-    browsers = ["chromium", "firefox", "webkit"] if args.browser == "all" else [args.browser]
-    for b in browsers:
-        cmd += ["--browser", b]
-    if args.headed:
-        cmd.append("--headed")
-    if args.slowmo:
-        cmd += ["--slowmo", str(args.slowmo)]
-    if args.destructive:
-        cmd.append("--destructive")
-    if args.quick:
-        cmd += ["-m", "not slow"]
-    return cmd + extra
+    runs = []
+    for target in ("e2e", "repo"):
+        if target == "e2e" and not any(p.startswith(E2E) for p in SUITES[args.suite]):
+            continue
+        if target == "repo" and "tests" not in SUITES[args.suite]:
+            continue
+        if target == "repo":
+            runs.append(dict(name="your project's own tests", junit=REPORTS / "junit_repo.xml",
+                             cmd=[sys.executable, "-m", "pytest", "tests",
+                                  f"--junitxml={REPORTS / 'junit_repo.xml'}"]))
+            continue
+        cmd = [sys.executable, "-m", "pytest", *[p for p in SUITES[args.suite] if p.startswith(E2E)],
+               "-c", f"{E2E}/pytest.ini", "--rootdir", E2E,
+               f"--base-url={args.url}",
+               f"--html={REPORTS / 'report.html'}", "--self-contained-html",
+               f"--junitxml={REPORTS / 'junit_e2e.xml'}",
+               "--screenshot=only-on-failure", "--tracing=retain-on-failure",
+               f"--output={REPORTS / 'artifacts'}"]
+        browsers = ["chromium", "firefox", "webkit"] if args.browser == "all" else [args.browser]
+        for b in browsers:
+            cmd += ["--browser", b]
+        if channel:
+            cmd += ["--browser-channel", channel]
+        if args.headed:
+            cmd.append("--headed")
+        if args.slowmo:
+            cmd += ["--slowmo", str(args.slowmo)]
+        if args.destructive:
+            cmd.append("--destructive")
+        if args.quick:
+            cmd += ["-m", "not slow"]
+        runs.append(dict(name="live site: API + browser", junit=REPORTS / "junit_e2e.xml", cmd=cmd + extra))
+    return runs
 
 
-def summarise(duration):
-    xml_file = REPORTS / "junit.xml"
-    if not xml_file.exists():
+def summarise(duration, junit_files):
+    junit_files = [f for f in junit_files if f.exists()]
+    if not junit_files:
         print(f"{R}No results file was produced - pytest may have crashed before running.{X}")
         return
-    root = ET.parse(xml_file).getroot()
-    suites = [root] if root.tag == "testsuite" else list(root)
+    suites = []
+    for xml_file in junit_files:
+        root = ET.parse(xml_file).getroot()
+        suites += [root] if root.tag == "testsuite" else list(root)
     per_file = OrderedDict()
     slowest, failures, skipped = [], [], []
     totals = dict(passed=0, failed=0, skipped=0)
@@ -185,6 +227,7 @@ def main():
     p.add_argument("--slowmo", type=int, default=0, help="ms delay between browser actions")
     p.add_argument("--quick", action="store_true", help="skip slow load tests")
     p.add_argument("--destructive", action="store_true", help="also test clearing ALL history")
+    p.add_argument("--channel", choices=["chrome", "msedge"], help="use the installed Chrome/Edge for browser tests")
     p.add_argument("--no-install", action="store_true", help="skip dependency check")
     args, extra = p.parse_known_args()
 
@@ -196,11 +239,16 @@ def main():
     if not args.no_install:
         ensure_dependencies()
     preflight(args.url)
+    channel = pick_browser_channel(args) if args.suite in ("ui", "e2e", "all") else None
 
     start = time.time()
-    code = subprocess.call(build_command(args, extra))
+    code = 0
+    runs = build_runs(args, extra, channel)
+    for i, run in enumerate(runs, 1):
+        banner(f"RUN {i}/{len(runs)}: {run['name']}", C)
+        code = subprocess.call(run["cmd"]) or code
     print()
-    summarise(time.time() - start)
+    summarise(time.time() - start, [r["junit"] for r in runs])
     sys.exit(code)
 
 

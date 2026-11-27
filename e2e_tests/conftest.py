@@ -8,6 +8,7 @@ Shared fixtures for the Indian Stock News Tracker test-suite.
 `--base-url` comes from the pytest-base-url plugin (installed with
 pytest-playwright); the default is set in pytest.ini.
 """
+import threading
 import time
 
 import pytest
@@ -31,28 +32,53 @@ def pytest_configure(config):
 
 
 class SiteClient:
-    """requests.Session wrapper: default timeout + retry on flaky gateway errors
-    (free PythonAnywhere accounts can be slow to wake up)."""
+    """requests.Session wrapper with:
+    * short connect timeout (10s) + long read timeout (60s, scraping is slow)
+    * a small gap between requests (be gentle with a free-tier host)
+    * one retry on gateway errors / network blips
+    * a circuit breaker: after 3 requests in a row fail completely, the rest
+      of the network tests fail instantly instead of waiting minutes each.
+    """
+
+    MAX_CONSECUTIVE_FAILURES = 3
+    MIN_GAP = 0.3
 
     def __init__(self, base_url: str):
         self.base = base_url.rstrip("/")
         self.session = requests.Session()
         self.session.headers["User-Agent"] = "StockNewsTracker-TestSuite/1.0"
+        self._lock = threading.Lock()
+        self._last = 0.0
+        self._failures = 0
 
     def request(self, method: str, path: str, **kwargs) -> requests.Response:
-        kwargs.setdefault("timeout", 60)
+        if self._failures >= self.MAX_CONSECUTIVE_FAILURES:
+            pytest.fail(
+                "Site unreachable: the last 3 requests all failed to connect, so the "
+                "remaining network tests were stopped early. Open the site in a browser - "
+                "it may be down, or throttling this PC after many quick requests.",
+                pytrace=False,
+            )
+        kwargs.setdefault("timeout", (10, 60))
         url = path if path.startswith("http") else self.base + path
         last_exc = None
-        for attempt in range(3):
+        for attempt in range(2):
+            with self._lock:
+                wait = self.MIN_GAP - (time.time() - self._last)
+                if wait > 0:
+                    time.sleep(wait)
+                self._last = time.time()
             try:
                 resp = self.session.request(method, url, **kwargs)
-                if resp.status_code in (502, 503, 504) and attempt < 2:
+                if resp.status_code in (502, 503, 504) and attempt == 0:
                     time.sleep(3)
                     continue
+                self._failures = 0
                 return resp
             except (requests.ConnectionError, requests.Timeout) as exc:
                 last_exc = exc
-                time.sleep(3)
+                time.sleep(2)
+        self._failures += 1
         raise last_exc
 
     def get(self, path, **kw):

@@ -21,7 +21,7 @@ jobs:
           pip install -r requirements.txt -r requirements-test.txt
           python -m playwright install --with-deps chromium
       - name: Run full test-suite
-        run: python run_tests.py --suite all --no-install
+        run: python run_tests.py --suite e2e --no-install
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
